@@ -28,6 +28,7 @@ export type FieldSpec = {
 export function FormDialog({
   trigger,
   triggerVariant = 'solid',
+  triggerSize,
   triggerTestId,
   title,
   description,
@@ -41,7 +42,8 @@ export function FormDialog({
   children,
 }: {
   trigger: ReactNode
-  triggerVariant?: 'solid' | 'outline' | 'ghost'
+  triggerVariant?: 'solid' | 'outline' | 'ghost' | 'quiet'
+  triggerSize?: 'sm' | 'md'
   triggerTestId?: string
   title: string
   description?: string
@@ -77,7 +79,7 @@ export function FormDialog({
   return (
     <Dialog open={open} onOpenChange={(v) => (setOpen(v), setError(null))}>
       <DialogTrigger asChild>
-        <Button variant={triggerVariant} data-testid={triggerTestId}>
+        <Button variant={triggerVariant} size={triggerSize} data-testid={triggerTestId}>
           {trigger}
         </Button>
       </DialogTrigger>

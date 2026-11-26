@@ -560,3 +560,90 @@ body {
 .compliance-table td {
   overflow-wrap: anywhere;
 }
+
+/* ------------------------------------------------------------ documents */
+
+.file-pick {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.file-pick-name {
+  font-size: var(--t-ui-sm);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.doc-filters {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.doc-links {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+.doc-list {
+  display: grid;
+  gap: var(--sp-3);
+}
+.doc-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--sp-3);
+  align-items: start;
+}
+.doc-row > svg {
+  margin-top: 3px;
+  color: var(--ink-muted);
+}
+.doc-row-title {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.doc-row-title a {
+  overflow-wrap: anywhere;
+}
+.chip-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.68;
+}
+.doc-cards {
+  display: none;
+  gap: var(--sp-3);
+}
+.doc-card {
+  display: grid;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border: var(--border) solid var(--hairline);
+  border-radius: var(--radius);
+}
+.doc-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--sp-3);
+}
+.doc-card-head a {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.doc-card-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  font-size: var(--t-ui-sm);
+}
+@media (max-width: 720px) {
+  .doc-table {
+    display: none;
+  }
+  .doc-cards {
+    display: grid;
+  }
+}

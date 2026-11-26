@@ -11,6 +11,7 @@ import {
   IconGauge,
   IconKiln,
   IconLayers,
+  IconPaperclip,
   IconMoon,
   IconSettings,
   IconSun,
@@ -38,6 +39,7 @@ const NAV = [
   { href: '/console/gate', label: 'Gate', icon: <IconLayers /> },
   { href: '/console/batches', label: 'Batches', icon: <IconKiln /> },
   { href: '/console/lab', label: 'Lab', icon: <IconFlask /> },
+  { href: '/console/documents', label: 'Documents', icon: <IconPaperclip /> },
   { href: '/console/compliance', label: 'Compliance', icon: <IconBook /> },
   { href: '/console/certify', label: 'Certify', icon: <IconUpload /> },
 ]
