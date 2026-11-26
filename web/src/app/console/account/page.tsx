@@ -21,7 +21,7 @@ function Backups() {
     void oc<BackupStatus>('/ops/backups').then((r) => r.ok && r.data && setStatus(r.data))
   }, [])
   if (!status) return null
-  const when = status.lastAt ? new Date(status.lastAt).toLocaleString('en-IN', { hour12: false }) : null
+  const when = status.lastAt ? new Date(status.lastAt).toLocaleString('en-GB', { hour12: false }) : null
   return (
     <Card style={{ maxWidth: 560 }}>
       <CardHead>
@@ -68,13 +68,13 @@ function SecurityEvents() {
             <Notice key={`a${i}`} tone="negative" title="Alert">
               <span data-testid="security-alert">
                 {statusLabel(e.kind.replace('alert-', ''))} on {e.email} at{' '}
-                {new Date(e.at).toLocaleString('en-IN', { hour12: false })}
+                {new Date(e.at).toLocaleString('en-GB', { hour12: false })}
               </span>
             </Notice>
           ))}
           {events.slice(0, 10).map((e, i) => (
             <div key={i} className="dp-row" data-testid="security-event">
-              <span className="mono muted">{new Date(e.at).toLocaleString('en-IN', { hour12: false })}</span>
+              <span className="mono muted">{new Date(e.at).toLocaleString('en-GB', { hour12: false })}</span>
               <b>{statusLabel(e.kind)}</b>
               <span className="muted">{e.email ?? ''}</span>
               <span className="mono muted">{e.ip ?? ''}</span>

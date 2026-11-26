@@ -24,8 +24,8 @@ export default async function Gate() {
         <NewLot pending={pending} />
       </div>
       <p className="sub muted" style={{ margin: 0, maxWidth: 'var(--measure)' }}>
-        Consignments arrive from the aggregation centre with the field app's offline records;
-        receiving one into a lot pairs the hopper-scale mass with the weighbridge slip.
+        Consignments arrive from the collection point with the field app's records. Receiving one
+        into a lot pairs the hopper-scale mass with the weighbridge slip.
       </p>
 
       <Card>

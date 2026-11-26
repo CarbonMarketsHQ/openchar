@@ -61,7 +61,12 @@ export default async function Overview() {
                   }}
                 >
                   <span className="mono">{b.id}</span>
-                  <span className="muted">{fmtDate(b.openedAt)} to {fmtDate(b.closedAt)}{b.biocharWetKg !== null ? ` · ${Math.round(b.biocharWetKg).toLocaleString('en-IN')} kg biochar` : ' · running'}</span>
+                  <span className="muted">
+                    {b.closedAt
+                      ? `${fmtDate(b.openedAt)} to ${fmtDate(b.closedAt)}`
+                      : `Opened ${fmtDate(b.openedAt)} · running`}
+                    {b.biocharWetKg !== null ? ` · ${Math.round(b.biocharWetKg).toLocaleString('en-GB')} kg biochar` : ''}
+                  </span>
                   <span className="mono muted">{b.sampleCount} samples</span>
                   <Badge tone={STATUS_TONE[b.status as keyof typeof STATUS_TONE] ?? 'neutral'}>{statusLabel(b.status)}</Badge>
                 </Link>

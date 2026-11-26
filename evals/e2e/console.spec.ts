@@ -10,11 +10,11 @@ test.beforeEach(async ({ context, page }) => {
 
 test('W2 gate: attach a pending consignment to a lot, both masses visible', async ({ page }) => {
   await page.goto('/console/gate')
-  const pending = page.getByTestId('consignment-row').filter({ hasText: 'CN-PENDING' })
+  const pending = page.getByTestId('consignment-row').filter({ hasText: 'CN-006' })
   await expect(pending).toBeVisible()
 
   await page.getByTestId('gate-new-lot').click()
-  await page.getByTestId('lot-consignment').selectOption('CN-PENDING')
+  await page.getByTestId('lot-consignment').selectOption('CN-006')
   await page.getByTestId('lot-weighbridge-mass').fill('405')
   await page.getByTestId('lot-moisture').fill('22')
   await page.getByTestId('lot-save').click()
