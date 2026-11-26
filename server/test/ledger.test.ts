@@ -12,7 +12,9 @@ import {
   blend,
   counterfactualCC3,
   durability200,
+  collectionDeduction,
   electricityDeduction,
+  fuelDeduction,
   gates,
   requirementStates,
   storedCo2e,
@@ -102,6 +104,20 @@ describe('L5 deductions', () => {
     const d = transportDeduction(85, 2.1, 0.00011)
     expect(d.co2eT).toBeCloseTo(0.019635, 9)
   })
+  it('feedstock collection: tonne-km × factor, on its own line', () => {
+    const d = collectionDeduction(54.3, 0.00011)
+    expect(d.co2eT).toBeCloseTo(0.005973, 6)
+    expect(d.kind).toBe('collection')
+    expect(d.label).toBe('Deduction: feedstock collection')
+  })
+
+  it('fuel: the logged tCO2e as its own line', () => {
+    const d = fuelDeduction(0.134)
+    expect(d.co2eT).toBe(0.134)
+    expect(d.label).toBe('Deduction: fuel')
+    expect(d.datapointIds).toEqual(['fuel-tco2e'])
+  })
+
   it('electricity: kWh × factor', () => {
     const d = electricityDeduction(420, 0.000716)
     expect(d.co2eT).toBeCloseTo(0.30072, 9)

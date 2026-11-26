@@ -42,10 +42,12 @@ export type BatchInput = {
 }
 
 export type Deduction = {
-  kind: 'transport' | 'electricity' | 'diesel' | 'embodied'
+  kind: 'transport' | 'collection' | 'electricity' | 'fuel' | 'diesel' | 'embodied'
   co2eT: number
   datapointIds: string[]
   note: string
+  /** Shown on the ledger line; defaults to "Deduction: <kind>". */
+  label?: string
 }
 
 export type Counterfactual = {
@@ -168,6 +170,28 @@ export function electricityDeduction(kwh: number, factorTPerKwh: number): Deduct
   }
 }
 
+/** Feedstock collection, from supplier to plant, in tonne-kilometres. */
+export function collectionDeduction(tonneKm: number, factorTPerTKm: number): Deduction {
+  return {
+    kind: 'collection',
+    label: 'Deduction: feedstock collection',
+    co2eT: tonneKm * factorTPerTKm,
+    datapointIds: ['collection-tkm', 'ef-transport'],
+    note: `${tonneKm} t-km × ${factorTPerTKm} tCO2e per t-km`,
+  }
+}
+
+/** Fossil fuel burned for the run (start-up, generator, loader), already in tCO2e. */
+export function fuelDeduction(co2eT: number): Deduction {
+  return {
+    kind: 'fuel',
+    label: 'Deduction: fuel',
+    co2eT,
+    datapointIds: ['fuel-tco2e'],
+    note: `${co2eT} tCO2e from the fuel log`,
+  }
+}
+
 export function counterfactualCC3(): Counterfactual {
   return {
     co2eT: 0,
@@ -201,7 +225,7 @@ export function batchLedger(
   for (const d of deductions) {
     lines.push({
       kind: `deduction-${d.kind}`,
-      label: `Deduction: ${d.kind}`,
+      label: d.label ?? `Deduction: ${d.kind}`,
       value: -d.co2eT,
       unit: 't CO2e',
       datapointIds: d.datapointIds,
