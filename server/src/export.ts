@@ -55,6 +55,8 @@ export const EXPORT_TABLES: { name: string; where: string; columns?: string; ser
   { name: 'instruments', where: `project_id IN ${P}` },
   { name: 'calibrations', where: `instrument_id IN (SELECT id FROM instruments WHERE project_id IN ${P})` },
   { name: 'duplicate_reviews', where: `project_id IN ${P}`, serial: true },
+  { name: 'fuel_logs', where: `project_id IN ${P}` },
+  { name: 'meter_readings', where: `project_id IN ${P}` },
 ]
 
 /** Tables that are deliberately not part of a workspace copy. */

@@ -214,6 +214,20 @@ export async function migrate(): Promise<void> {
       decided_by text, note text,
       created_at timestamptz NOT NULL DEFAULT now()
     );
+    -- Fuel burned at the plant and on vehicle trips, and cumulative meter readings.
+    CREATE TABLE IF NOT EXISTS fuel_logs (
+      id text PRIMARY KEY, project_id text NOT NULL REFERENCES projects(id),
+      batch_id text REFERENCES batches(id) ON DELETE SET NULL,
+      logged_at timestamptz NOT NULL, fuel text NOT NULL, quantity numeric NOT NULL,
+      use text NOT NULL, vehicle text, trip_km numeric, note text, created_by text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS meter_readings (
+      id text PRIMARY KEY, project_id text NOT NULL REFERENCES projects(id),
+      meter text NOT NULL, read_at timestamptz NOT NULL, kwh numeric NOT NULL,
+      source text NOT NULL DEFAULT 'manual',
+      UNIQUE (project_id, meter, read_at)
+    );
     -- Written by deploy/backup/backup.sh after each good run; platform-wide,
     -- so seeding never truncates it.
     CREATE TABLE IF NOT EXISTS backup_runs (
@@ -230,6 +244,8 @@ export async function migrate(): Promise<void> {
   await pool.query(`ALTER TABLE dispatches ADD COLUMN IF NOT EXISTS distance_km numeric`)
   await pool.query(`ALTER TABLE dispatches ADD COLUMN IF NOT EXISTS dest_lat numeric`)
   await pool.query(`ALTER TABLE dispatches ADD COLUMN IF NOT EXISTS dest_lng numeric`)
+  await pool.query(`ALTER TABLE batch_ops ADD COLUMN IF NOT EXISTS collection_tkm numeric`)
+  await pool.query(`ALTER TABLE batch_ops ADD COLUMN IF NOT EXISTS fuel_tco2e numeric`)
 }
 
 /** Canonical JSON: keys sorted recursively, so a jsonb round-trip through
