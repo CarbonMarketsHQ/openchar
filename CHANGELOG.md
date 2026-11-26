@@ -4,6 +4,12 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Fuel and electricity
+- A new Energy page records fuel by type (diesel, petrol, LPG, biomass) and use (reactor start-up, generator, loader, vehicle trip), linked to a batch or recorded separately. Emissions use IPCC 2006 default emission factors, and biomass is counted as biogenic.
+- Cumulative electricity meter readings (kWh) can be entered manually, uploaded from a CSV file, or sent from a meter feed through the API. Electricity for a batch is calculated from the increase in its meter readings over the batch period.
+- Each batch page shows its fuel and metered electricity next to the run inputs used by the ledger. An operator can apply them in one step. The ledger now includes a fuel line, and feedstock collection distances appear on their own line.
+- Tests: ENG1 and ENG2 in `evals/e2e/energy.spec.ts`, and unit tests for the new ledger lines.
+
 ### Road distances
 - Each consignment shows its road distance to the plant. Until the distance driven is recorded, it is calculated from the supplier and plant coordinates (straight-line distance multiplied by 1.3 for road travel) and marked as an estimate.
 - Each batch page shows feedstock collection and biochar delivery separately, with the mass-weighted distance and tonne-kilometres for each.

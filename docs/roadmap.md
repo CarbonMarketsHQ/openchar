@@ -11,8 +11,6 @@ works.
 
 ## Production and accounting
 
-- Diesel and other fuels per batch and per vehicle trip, including reactor
-  start-up fuel, and electricity from a meter feed.
 - Emissions tagged by Scope 1, 2 and 3, with a dashboard by source, batch and
   month.
 - A full mass and carbon balance across biochar, liquids and gas, with a
