@@ -8,7 +8,6 @@ works.
 
 ## Records and evidence
 
-- Detection of duplicate records, such as one slip entered twice.
 
 ## Production and accounting
 

@@ -4,6 +4,12 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Duplicate records
+- The Gate page flags possible duplicates: two consignments from the same supplier within 1% in mass and within 30 minutes of each other, the same weighbridge slip recorded for two lots, or two slips with the same mass entered within 2 hours.
+- The Documents page flags any file uploaded more than once.
+- The Compliance page shows a warning until a user marks a flagged pair as not a duplicate. Once marked, that pair is not flagged again.
+- Tests: DUP1 and DUP2 in `evals/e2e/duplicates.spec.ts`.
+
 ### Calibration register
 - A Calibration page lists every instrument whose readings are used in records (scales, thermocouples, and moisture, flow, energy and gas meters) and shows its last calibration, next due date and status.
 - Recording a calibration sets the next due date from the instrument's calibration interval, unless the certificate has a different date. A failed calibration marks the instrument out of use.
