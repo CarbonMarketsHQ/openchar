@@ -243,8 +243,8 @@ async function seed() {
   )
 
   await pool.query(
-    `INSERT INTO dispatches (id, batch_id, to_name, mass_kg, dispatched_at) VALUES
-     ('dsp-01', 'bat-ht02', 'Bulk biochar buyer (demo)', 600, $1)`,
+    `INSERT INTO dispatches (id, batch_id, to_name, mass_kg, dispatched_at, dest_lat, dest_lng) VALUES
+     ('dsp-01', 'bat-ht02', 'Bulk biochar buyer (demo)', 600, $1, -0.12, 36.17)`,
     [iso(2)]
   )
   await pool.query(
