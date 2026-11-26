@@ -9,6 +9,8 @@ import { requireProject } from './auth.js'
 import { pool } from './db.js'
 import { resolveBatch } from './report.js'
 
+export const CONTAINERS = ['drum', 'ibc', 'tank', 'jerrycan'] as const
+
 async function nextUnitId(projectId: string): Promise<string> {
   const { rows } = await pool.query(`SELECT count(*)::int AS n FROM units WHERE project_id = $1`, [projectId])
   let id = `U-${String(rows[0].n + 1).padStart(4, '0')}`
@@ -30,6 +32,8 @@ function shapeUnit(u: Record<string, unknown>) {
   return {
     id: u.id,
     kind: u.kind,
+    material: (u.material as string) ?? 'biochar',
+    coProduct: u.cp_id ? { id: u.cp_id as string, grade: u.cp_grade as string, fate: u.cp_fate as string } : null,
     massKg: Number(u.mass_kg),
     status: u.status,
     originBatch: (u.batch_code as string) ?? null,
@@ -43,7 +47,8 @@ export function registerUnitRoutes(app: FastifyInstance) {
     if (!ctx) return
     const { batch } = req.query as { batch?: string }
     const { rows } = await pool.query(
-      `SELECT u.*, b.code AS batch_code FROM units u LEFT JOIN batches b ON b.id = u.origin_batch_id
+      `SELECT u.*, b.code AS batch_code, cp.id AS cp_id, cp.grade AS cp_grade, cp.fate AS cp_fate
+       FROM units u LEFT JOIN batches b ON b.id = u.origin_batch_id LEFT JOIN co_products cp ON cp.id = u.co_product_id
        WHERE u.project_id = $1 ${batch ? 'AND b.code = $2' : ''} ORDER BY u.id`,
       batch ? [ctx.projectId, batch] : [ctx.projectId]
     )
@@ -74,13 +79,54 @@ export function registerUnitRoutes(app: FastifyInstance) {
     return { created }
   })
 
+  /** Package a co-product stream (bio-liquids, or biochar sent to another
+   * line) into drums, IBCs, tanks or jerrycans, never more than the stream. */
+  app.post('/co-products/:id/units', async (req, reply) => {
+    const ctx = await requireProject(req, reply)
+    if (!ctx) return
+    const { id } = req.params as { id: string }
+    const cp = (
+      await pool.query(
+        `SELECT cp.*, b.id AS batch_id, b.code FROM co_products cp JOIN batches b ON b.id = cp.batch_id
+         WHERE cp.id = $1 AND b.project_id = $2`,
+        [id, ctx.projectId]
+      )
+    ).rows[0]
+    if (!cp) return reply.code(404).send({ error: 'No such co-product in this project.' })
+    const b = (req.body ?? {}) as { count?: number; massKgEach?: number; kind?: string }
+    const kind = b.kind ?? 'drum'
+    if (!CONTAINERS.includes(kind as never)) return reply.code(400).send({ error: `Choose a container: ${CONTAINERS.join(', ')}.` })
+    const count = Math.min(Math.max(1, Math.round(Number(b.count) || 1)), 200)
+    const each = Number(b.massKgEach)
+    if (!Number.isFinite(each) || each <= 0) return reply.code(400).send({ error: 'massKgEach must be a positive number' })
+    const packed = Number(
+      (await pool.query(`SELECT COALESCE(SUM(mass_kg), 0) AS m FROM units WHERE co_product_id = $1`, [id])).rows[0].m
+    )
+    const left = Number(cp.mass_kg) - packed
+    if (count * each > left + 1e-9) {
+      return reply.code(400).send({ error: `Only ${Math.round(left)} kg of this stream is left to package.` })
+    }
+    const created: string[] = []
+    for (let i = 0; i < count; i++) {
+      const uid = await nextUnitId(ctx.projectId)
+      await pool.query(
+        `INSERT INTO units (id, project_id, origin_batch_id, kind, mass_kg, material, co_product_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [uid, ctx.projectId, cp.batch_id, kind, each, cp.kind, id]
+      )
+      await addEvent(uid, 'created', { fromBatch: cp.code, coProduct: `${cp.kind} grade ${cp.grade}`, massKg: each })
+      created.push(uid)
+    }
+    return { created }
+  })
+
   app.get('/units/:id', async (req, reply) => {
     const ctx = await requireProject(req, reply)
     if (!ctx) return
     const { id } = req.params as { id: string }
     const u = (
       await pool.query(
-        `SELECT u.*, b.code AS batch_code FROM units u LEFT JOIN batches b ON b.id = u.origin_batch_id
+        `SELECT u.*, b.code AS batch_code, cp.id AS cp_id, cp.grade AS cp_grade, cp.fate AS cp_fate
+         FROM units u LEFT JOIN batches b ON b.id = u.origin_batch_id LEFT JOIN co_products cp ON cp.id = u.co_product_id
          WHERE u.id = $1 AND u.project_id = $2`,
         [id, ctx.projectId]
       )
@@ -133,8 +179,8 @@ export function registerUnitRoutes(app: FastifyInstance) {
     for (const mass of b.masses) {
       const childId = await nextUnitId(ctx.projectId)
       await pool.query(
-        `INSERT INTO units (id, project_id, origin_batch_id, kind, mass_kg) VALUES ($1, $2, $3, $4, $5)`,
-        [childId, ctx.projectId, u.origin_batch_id, u.kind, mass]
+        `INSERT INTO units (id, project_id, origin_batch_id, kind, mass_kg, material, co_product_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [childId, ctx.projectId, u.origin_batch_id, u.kind, mass, u.material, u.co_product_id]
       )
       await pool.query(`INSERT INTO unit_parents (unit_id, parent_id) VALUES ($1, $2)`, [childId, id])
       await addEvent(childId, 'created', { splitFrom: id, massKg: mass })
@@ -164,11 +210,15 @@ export function registerUnitRoutes(app: FastifyInstance) {
     if (Math.abs(massKg - total) > total * 0.02) {
       return reply.code(400).send({ error: `merged mass ${massKg} kg must balance the parents' ${total} kg within 2%` })
     }
+    if (!rows.every((u) => u.material === rows[0].material)) {
+      return reply.code(400).send({ error: 'Biochar and bio-liquid cannot be merged into one unit.' })
+    }
     const sameBatch = rows.every((u) => u.origin_batch_id === rows[0].origin_batch_id)
+    const sameStream = rows.every((u) => u.co_product_id === rows[0].co_product_id)
     const childId = await nextUnitId(ctx.projectId)
     await pool.query(
-      `INSERT INTO units (id, project_id, origin_batch_id, kind, mass_kg) VALUES ($1, $2, $3, $4, $5)`,
-      [childId, ctx.projectId, sameBatch ? rows[0].origin_batch_id : null, rows[0].kind, massKg]
+      `INSERT INTO units (id, project_id, origin_batch_id, kind, mass_kg, material, co_product_id) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [childId, ctx.projectId, sameBatch ? rows[0].origin_batch_id : null, rows[0].kind, massKg, rows[0].material, sameStream ? rows[0].co_product_id : null]
     )
     for (const u of rows) {
       await pool.query(`INSERT INTO unit_parents (unit_id, parent_id) VALUES ($1, $2)`, [childId, u.id])
