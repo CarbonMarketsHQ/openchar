@@ -37,7 +37,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: docker compose up -d db
+      - run: docker compose up -d --wait db
       - run: npx playwright test
         env:
           CI: 'true'

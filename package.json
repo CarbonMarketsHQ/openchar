@@ -15,7 +15,7 @@
     "seed": "npm run seed -w server",
     "test:ledger": "npm run test -w server",
     "test:e2e": "playwright test",
-    "evals": "npm run test:ledger && docker compose up -d db && playwright test"
+    "evals": "npm run test:ledger && docker compose up -d --wait db && playwright test"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",

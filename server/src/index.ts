@@ -1027,8 +1027,10 @@ async function waitForDb(): Promise<void> {
     } catch (err) {
       // Retry only while Postgres is still starting; a wrong password or
       // database name will not fix itself.
-      const code = (err as { code?: string }).code
-      const starting = code === 'ECONNREFUSED' || code === '57P03' || code === 'ENOTFOUND'
+      const { code, message } = err as { code?: string; message?: string }
+      const starting =
+        ['ECONNREFUSED', 'ECONNRESET', 'ENOTFOUND', 'EAI_AGAIN', '57P03'].includes(code ?? '') ||
+        /terminated unexpectedly|the database system is starting up/i.test(message ?? '')
       if (!starting || Date.now() > deadline) throw err
       await new Promise((r) => setTimeout(r, 1000))
     }
