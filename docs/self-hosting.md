@@ -118,6 +118,12 @@ the reading to that batch. Plants without a broker export the temperature log
 from the reactor controller (PLC) as a CSV file, one minute and temperature per
 row, and upload it on the batch page.
 
+Electricity meters report their running total in kWh. A gateway can post
+readings to `POST /api/oc/meters/readings` with a body such as
+`{"readings": [{"meter": "Main meter", "readAt": "2026-11-26T00:00:00Z", "kwh": 19150}]}`,
+and the Energy page also takes them by hand or as a CSV file with the columns
+`meter,read_at,kwh`.
+
 ## Backups
 
 On a Linux server, install the nightly backup timer once:
