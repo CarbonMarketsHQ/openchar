@@ -159,6 +159,15 @@ export async function migrate(): Promise<void> {
       payload_hash text NOT NULL, mode text NOT NULL,
       created_at timestamptz NOT NULL DEFAULT now()
     );
+    -- Documents attached to the records they are evidence for.
+    CREATE TABLE IF NOT EXISTS source_links (
+      source_id text NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
+      project_id text NOT NULL REFERENCES projects(id),
+      record_kind text NOT NULL, record_id text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (source_id, record_kind, record_id)
+    );
+    CREATE INDEX IF NOT EXISTS source_links_record ON source_links (project_id, record_kind, record_id);
     -- Written by deploy/backup/backup.sh after each good run; platform-wide,
     -- so seeding never truncates it.
     CREATE TABLE IF NOT EXISTS backup_runs (

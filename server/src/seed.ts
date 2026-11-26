@@ -77,6 +77,11 @@ async function seed() {
      ('src-app-photos', $1, 'application-evidence', 'Application day photo set (demo)', 'photos/app-01/', 'Geo-tagged application photos and farmer attestation')`,
     [DEMO.projectId]
   )
+  // The scale calibration record belongs to the plant, not to one batch.
+  await pool.query(
+    `INSERT INTO source_links (source_id, project_id, record_kind, record_id) VALUES ('src-hopper-cal', $1, 'facility', $2)`,
+    [DEMO.projectId, DEMO.facilityId]
+  )
 
   await pool.query(
     `INSERT INTO suppliers (id, project_id, name, village, category, lat, lng) VALUES
