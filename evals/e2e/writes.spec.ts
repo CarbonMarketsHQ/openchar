@@ -97,7 +97,7 @@ test('WR3 open a batch, upload telemetry, samples, close, certificate, inputs', 
   await page.getByTestId('cp-mass').fill('180')
   await page.getByTestId('cp-fate').fill('Wood vinegar for agriculture')
   await page.getByTestId('co-product-save').click()
-  await expect(page.getByText('Bio liquid 1')).toBeVisible()
+  await expect(page.getByText('Bio-liquid 1')).toBeVisible()
 })
 
 test('WR4 the ledger computes from the entered values', async ({ page }) => {

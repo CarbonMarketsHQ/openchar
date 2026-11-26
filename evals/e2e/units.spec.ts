@@ -64,3 +64,46 @@ test('UN1 package, split, merge: mass balances and lineage holds', async ({ cont
   await page.goto(`/console/batches/${SEED.batches.sampled}`)
   await expect(page.getByTestId('unit-row').first()).toBeVisible()
 })
+
+test('UN2 bio-liquid drums carry their own QR and custody chain, never more than the stream', async ({ context, page }) => {
+  const token = await login(context, page.request)
+  const H = apiHeaders(token)
+  const batch = (await (await page.request.get(`${api}/batches/${SEED.batches.sampled}`, { headers: H })).json()) as {
+    coProducts: { id: string; kind: string; grade: string; massKg: number }[]
+  }
+  const stream = batch.coProducts.find((c) => c.kind === 'bio-liquid' && c.grade === '1')!
+
+  await page.goto(`/console/batches/${SEED.batches.sampled}`)
+  const row = page.getByTestId('co-product-row').filter({ hasText: 'Bio-liquid 1' })
+  await expect(row.getByTestId('co-product-packed')).toHaveText('Not in containers')
+  await row.getByTestId('package-co-product').click()
+  await page.getByTestId('package-kind').selectOption('drum')
+  await page.getByTestId('package-count').fill('2')
+  await page.getByTestId('package-mass').fill('100')
+  await page.getByTestId('package-submit').click()
+  await expect(row.getByTestId('co-product-packed')).toHaveText('2 containers, 200 kg')
+
+  // 220 kg in the stream, 200 kg packed: a 30 kg drum is refused.
+  const over = await page.request.post(`${api}/co-products/${stream.id}/units`, { headers: H, data: { count: 1, massKgEach: 30, kind: 'drum' } })
+  expect(over.status()).toBe(400)
+  expect(((await over.json()) as { error: string }).error).toContain('20 kg')
+
+  const units = (await (await page.request.get(`${api}/units?batch=${SEED.batches.sampled}`, { headers: H })).json()) as {
+    id: string
+    material: string
+    status: string
+  }[]
+  const drum = units.find((u) => u.material === 'bio-liquid')!
+  const bag = units.find((u) => u.material === 'biochar' && u.status === 'in-storage')
+  if (bag) {
+    const mixed = await page.request.post(`${api}/units/merge`, { headers: H, data: { unitIds: [drum.id, bag.id] } })
+    expect(mixed.status()).toBe(400)
+  }
+
+  await page.request.post(`${api}/units/${drum.id}/deliver`, { headers: H, data: { toName: 'Nakuru agro-dealer (demo)' } })
+  await page.goto(`/console/units/${drum.id}`)
+  await expect(page.getByTestId('unit-material')).toContainText('Bio-liquid, grade 1. Wood vinegar for agriculture')
+  await expect(page.getByTestId('unit-qr')).toBeVisible()
+  await expect(page.getByTestId('unit-event').first()).toContainText(`100 kg of bio-liquid grade 1 from batch ${SEED.batches.sampled}`)
+  await expect(page.getByTestId('unit-event').last()).toContainText('To Nakuru agro-dealer (demo)')
+})
