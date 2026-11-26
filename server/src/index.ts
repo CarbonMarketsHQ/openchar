@@ -33,6 +33,7 @@ import { registerEnergyRoutes } from './energy.js'
 import { registerEmissionsRoutes } from './emissions.js'
 import { registerBalanceRoutes } from './balance.js'
 import { registerTrendRoutes } from './trends.js'
+import { registerReportRoutes } from './reports.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -101,6 +102,7 @@ registerEnergyRoutes(app)
 registerEmissionsRoutes(app)
 registerBalanceRoutes(app)
 registerTrendRoutes(app)
+registerReportRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 
