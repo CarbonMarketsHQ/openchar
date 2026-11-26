@@ -8,7 +8,7 @@ import { oc } from '@/lib/client'
 export type FieldSpec = {
   name: string
   label: string
-  type?: 'text' | 'number' | 'select' | 'date' | 'textarea'
+  type?: 'text' | 'number' | 'select' | 'date' | 'datetime-local' | 'textarea'
   options?: { value: string; label: string }[]
   step?: string
   min?: string

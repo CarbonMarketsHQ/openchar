@@ -49,3 +49,25 @@ export function recordHref(kind: string, id: string): string {
   if (kind === 'facility') return `/console/facilities#facility-${encodeURIComponent(id)}`
   return `/console/gate#${kind}-${encodeURIComponent(id)}`
 }
+
+export const DOWNTIME_CAUSES: { value: string; label: string }[] = [
+  { value: 'planned-maintenance', label: 'Planned maintenance' },
+  { value: 'breakdown', label: 'Breakdown' },
+  { value: 'feedstock-shortage', label: 'Feedstock shortage' },
+  { value: 'power-outage', label: 'Power outage' },
+  { value: 'weather', label: 'Weather' },
+  { value: 'quality-hold', label: 'Quality hold' },
+  { value: 'other', label: 'Other' },
+]
+
+export function causeLabel(value: string): string {
+  return DOWNTIME_CAUSES.find((c) => c.value === value)?.label ?? statusLabel(value)
+}
+
+/** 95 → "1 h 35 min", 720 → "12 h", 40 → "40 min". */
+export function fmtDuration(min: number): string {
+  const h = Math.floor(min / 60)
+  const m = Math.round(min % 60)
+  if (h === 0) return `${m} min`
+  return m === 0 ? `${h} h` : `${h} h ${m} min`
+}
