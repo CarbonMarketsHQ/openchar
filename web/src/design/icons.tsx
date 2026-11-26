@@ -265,6 +265,13 @@ export const IconFuel = (p: IconProps) => (
   </Icon>
 )
 
+export const IconBars = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M1.5 13.5h13" />
+    <path d="M4 13.5V8.5M8 13.5V3.5M12 13.5V6.5" />
+  </Icon>
+)
+
 export const IconClock = (p: IconProps) => (
   <Icon {...p}>
     <circle cx="8" cy="8" r="5.5" />

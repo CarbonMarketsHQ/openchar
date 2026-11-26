@@ -810,3 +810,60 @@ body {
 .transport-row--pair {
   grid-template-columns: minmax(0, 1fr) auto;
 }
+
+/* ------------------------------------------------------------ emissions */
+
+.scope-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.emissions-split {
+  display: grid;
+  gap: var(--sp-5);
+}
+.scope-grid {
+  stroke: var(--hairline);
+  stroke-width: 1;
+}
+.scope-axis {
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+}
+.scope-tick {
+  fill: var(--ink-muted);
+  font-size: 12px;
+  font-family: var(--sans);
+}
+.scope-scope1,
+.scope-fill-1 {
+  fill: var(--accent-ink);
+  background: var(--accent-ink);
+}
+.scope-scope2,
+.scope-fill-2 {
+  fill: var(--info);
+  background: var(--info);
+}
+.scope-scope3,
+.scope-fill-3 {
+  fill: var(--caution);
+  background: var(--caution);
+}
+.scope-key {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  vertical-align: baseline;
+}
+.scope-legend {
+  list-style: none;
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  display: flex;
+  gap: var(--sp-5);
+  flex-wrap: wrap;
+  font-size: var(--t-ui-sm);
+  color: var(--ink-muted);
+}
