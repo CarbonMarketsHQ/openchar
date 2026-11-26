@@ -24,6 +24,7 @@ import { buildCertifyPayload, buildCompliance, buildLedger, findAnomalies, resol
 import { aggregateSensorSeries, certifyConfig, certifySubmit } from './certify.js'
 import { registerUnitRoutes } from './units.js'
 import { allLinks, registerDocumentRoutes } from './documents.js'
+import { registerExportRoutes } from './export.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -83,6 +84,7 @@ app.get('/health', async () => {
 registerAuthRoutes(app)
 registerUnitRoutes(app)
 registerDocumentRoutes(app)
+registerExportRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 
