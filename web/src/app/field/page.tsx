@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, IconCamera, IconPin, Logo } from '@/design'
+import { ModeSwitch } from './mode-switch'
 
 type Supplier = { id: string; name: string }
 
@@ -239,6 +240,7 @@ export default function FieldApp() {
               : 'All records synced'}
         </span>
       </header>
+      <ModeSwitch mode="gate" />
 
       <div style={{ display: 'grid', gap: 'var(--sp-6)', alignContent: 'start' }}>
         <form

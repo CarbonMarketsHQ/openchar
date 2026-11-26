@@ -251,7 +251,7 @@ body {
 .field-shell {
   min-height: 100dvh;
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto auto 1fr;
   max-width: 560px;
   margin: 0 auto;
   padding: var(--sp-4);
@@ -1187,4 +1187,68 @@ body {
     max-width: none;
     border-radius: 0;
   }
+}
+
+/* ------------------------------------------------- field app: modes, apply */
+
+.field-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-control);
+  background: var(--surface-sunken);
+}
+.field-modes a {
+  text-align: center;
+  padding: 8px 10px;
+  border-radius: calc(var(--radius-control) - 2px);
+  color: var(--ink-muted);
+  text-decoration: none;
+  font-size: var(--t-ui-sm);
+  font-weight: var(--w-medium);
+}
+.field-modes a[aria-current='page'] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 0 0 var(--border) var(--hairline);
+}
+.boundary {
+  display: grid;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  border: var(--border) dashed var(--hairline);
+  border-radius: var(--radius-control);
+}
+.boundary-svg {
+  width: 100%;
+  height: 120px;
+  display: block;
+}
+.boundary-svg polygon,
+.boundary-svg polyline {
+  fill: color-mix(in srgb, var(--accent-ink) 18%, transparent);
+  stroke: var(--accent-ink);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.signature {
+  width: 100%;
+  height: 140px;
+  display: block;
+  border: var(--border) solid var(--hairline);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  touch-action: none;
+}
+.thumbs {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+.thumbs img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
 }
