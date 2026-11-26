@@ -55,6 +55,10 @@ test('UN1 package, split, merge: mass balances and lineage holds', async ({ cont
   await expect(page.getByTestId('unit-parents')).toContainText(c1)
   await expect(page.getByTestId('unit-origin')).toHaveText(SEED.batches.sampled)
   await expect(page.getByTestId('unit-event').first()).toBeVisible()
+  // Custody events read as words, never as raw JSON.
+  for (const text of await page.getByTestId('unit-event').allInnerTexts()) expect(text).not.toMatch(/[{}"]/)
+  await page.goto(`/console/units/${u2}`)
+  await expect(page.getByTestId('unit-event').last()).toContainText('At Eval farm')
 
   // And the batch page lists the fleet.
   await page.goto(`/console/batches/${SEED.batches.sampled}`)

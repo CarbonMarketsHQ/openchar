@@ -18,6 +18,21 @@ type Unit = {
   children: string[]
 }
 
+/** One line of plain language for a custody event. */
+function eventDetail(kind: string, d: Record<string, unknown>): string {
+  const kg = typeof d.massKg === 'number' ? fmtKg(d.massKg) : null
+  const list = (v: unknown) => (Array.isArray(v) ? v.join(', ') : String(v))
+  if (kind === 'created' && d.fromBatch) return `${kg} from batch ${d.fromBatch}`
+  if (kind === 'created' && d.splitFrom) return `${kg} split from ${d.splitFrom}`
+  if (kind === 'created' && d.mergedFrom) return `${kg} merged from ${list(d.mergedFrom)}`
+  if ((kind === 'split' || kind === 'merged') && d.into) return `Into ${list(d.into)}`
+  if (kind === 'delivered' && d.toName) return `To ${d.toName}`
+  if (kind === 'applied' && d.farmName) return `At ${d.farmName}`
+  return Object.entries(d)
+    .map(([k, v]) => `${k}: ${list(v)}`)
+    .join(', ')
+}
+
 const TONE = { 'in-storage': 'info', delivered: 'caution', applied: 'positive', split: 'neutral', merged: 'neutral' } as const
 
 export default async function UnitPage({ params }: { params: Promise<{ id: string }> }) {
@@ -107,7 +122,7 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
                 <div key={i} className="dp-row" data-testid="unit-event">
                   <span className="mono muted">{fmtDate(e.at)}</span>
                   <b>{statusLabel(e.kind)}</b>
-                  <span className="muted">{JSON.stringify(e.detail)}</span>
+                  <span className="muted">{eventDetail(e.kind, e.detail ?? {})}</span>
                 </div>
               ))}
             </div>
