@@ -186,6 +186,27 @@ export async function migrate(): Promise<void> {
       note text, created_by text,
       created_at timestamptz NOT NULL DEFAULT now()
     );
+    -- The calibration register.
+    CREATE TABLE IF NOT EXISTS instruments (
+      id text PRIMARY KEY, project_id text NOT NULL REFERENCES projects(id),
+      facility_id text REFERENCES facilities(id),
+      name text NOT NULL, kind text NOT NULL, serial text,
+      interval_days integer NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS calibrations (
+      id text PRIMARY KEY, instrument_id text NOT NULL REFERENCES instruments(id) ON DELETE CASCADE,
+      calibrated_on date NOT NULL, next_due date NOT NULL,
+      performed_by text NOT NULL, result text NOT NULL,
+      source_id text REFERENCES sources(id), note text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS calibration_alerts (
+      instrument_id text NOT NULL REFERENCES instruments(id) ON DELETE CASCADE,
+      due_on date NOT NULL, kind text NOT NULL,
+      sent_at timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (instrument_id, due_on, kind)
+    );
     -- Written by deploy/backup/backup.sh after each good run; platform-wide,
     -- so seeding never truncates it.
     CREATE TABLE IF NOT EXISTS backup_runs (

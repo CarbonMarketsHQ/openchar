@@ -52,6 +52,8 @@ export const EXPORT_TABLES: { name: string; where: string; columns?: string; ser
   { name: 'source_links', where: `project_id IN ${P}` },
   { name: 'shifts', where: `project_id IN ${P}` },
   { name: 'downtime', where: `project_id IN ${P}` },
+  { name: 'instruments', where: `project_id IN ${P}` },
+  { name: 'calibrations', where: `instrument_id IN (SELECT id FROM instruments WHERE project_id IN ${P})` },
 ]
 
 /** Tables that are deliberately not part of a workspace copy. */
@@ -61,6 +63,7 @@ export const NOT_EXPORTED: Record<string, string> = {
   auth_events: 'the sign-in log of this server',
   backup_runs: 'this server’s backup history',
   cloud_signup_codes: 'hosted-service sign-up codes',
+  calibration_alerts: 'which calibration emails this server already sent',
 }
 
 function csvCell(v: unknown): string {

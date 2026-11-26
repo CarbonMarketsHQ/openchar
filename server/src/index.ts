@@ -26,6 +26,7 @@ import { registerUnitRoutes } from './units.js'
 import { allLinks, registerDocumentRoutes } from './documents.js'
 import { registerExportRoutes } from './export.js'
 import { registerShiftRoutes } from './shifts.js'
+import { registerCalibrationRoutes, sendCalibrationAlerts } from './calibration.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -87,6 +88,7 @@ registerUnitRoutes(app)
 registerDocumentRoutes(app)
 registerExportRoutes(app)
 registerShiftRoutes(app)
+registerCalibrationRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 
@@ -1033,6 +1035,10 @@ waitForDb()
   .then(() => loadExtensions(app))
   .then(() => {
     startMqttIngest()
+    // Calibration alerts by email, only where the operator turned them on.
+    const alerts = () => void sendCalibrationAlerts().catch((e) => console.error('calibration alerts:', e))
+    setTimeout(alerts, 60_000).unref()
+    setInterval(alerts, 6 * 3600_000).unref()
     return app.listen({ port, host: '0.0.0.0' })
   })
   .then(() => console.log(`openchar-api on :${port}`))
