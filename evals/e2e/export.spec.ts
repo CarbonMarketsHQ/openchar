@@ -131,7 +131,8 @@ test('EX3 the copy loads into an empty server with its hash chain intact', async
     const { rows: pw } = await db.query(`SELECT DISTINCT password_hash FROM users`)
     expect(pw.map((r) => r.password_hash)).toEqual(['!'])
     const { rows: files } = await db.query(`SELECT file_path, file_sha256 FROM sources WHERE file_path IS NOT NULL`)
-    expect(files.length).toBe(manifest.files.length)
+    // Documents that share one file share one copy of it.
+    expect(new Set(files.map((f) => f.file_sha256)).size).toBe(manifest.files.length)
     for (const f of files) {
       expect(createHash('sha256').update(readFileSync(f.file_path)).digest('hex')).toBe(f.file_sha256)
     }
