@@ -1,0 +1,433 @@
+/* App-level styles. Components come from system.css; these are the page
+   scaffolds, the stat tiles, the charts, the field app and the public page.
+   Tokens only — no raw colour, size or duration that a token could carry. */
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+body {
+  background: var(--base);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--t-ui);
+  line-height: var(--lh-ui);
+}
+
+/* ------------------------------------------------------------------ page */
+
+.app-main {
+  padding: var(--sp-6) var(--sp-7) var(--sp-11);
+  display: grid;
+  gap: var(--sp-6);
+  align-content: start;
+  max-width: 1180px;
+}
+@media (max-width: 900px) {
+  .app-main {
+    padding: var(--sp-4) var(--sp-4) var(--sp-9);
+  }
+}
+
+.page-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.page-head h1 {
+  font-family: var(--serif);
+  font-size: var(--t-title);
+  font-weight: var(--w-regular);
+  line-height: var(--lh-tight);
+  margin: 0;
+}
+.page-head .sub {
+  color: var(--ink-muted);
+  font-size: var(--t-ui-sm);
+  max-width: var(--measure);
+}
+
+.section-title {
+  font-size: var(--t-head);
+  font-weight: var(--w-strong);
+  margin: 0 0 var(--sp-3);
+}
+
+/* ------------------------------------------------------------ stat tiles */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--sp-4);
+}
+.stat {
+  background: var(--surface);
+  border: var(--border) solid var(--hairline);
+  border-radius: var(--radius);
+  padding: var(--sp-4) var(--sp-5);
+  display: grid;
+  gap: var(--sp-1);
+  align-content: start;
+}
+.stat .k {
+  font-family: var(--mono);
+  font-size: var(--t-label);
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.stat .v {
+  font-family: var(--mono);
+  font-size: 1.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-tight);
+}
+.stat .v small {
+  font-size: var(--t-caption);
+  color: var(--ink-muted);
+  font-family: var(--sans);
+}
+.stat .d {
+  font-size: var(--t-caption);
+  color: var(--ink-muted);
+}
+
+/* ---------------------------------------------------------------- charts */
+
+.chart {
+  background: var(--surface);
+  border: var(--border) solid var(--hairline);
+  border-radius: var(--radius);
+  padding: var(--sp-4) var(--sp-4) var(--sp-2);
+  position: relative;
+}
+.chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.chart .axis {
+  stroke: var(--hairline);
+  stroke-width: 1;
+}
+.chart .grid {
+  stroke: var(--hairline);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+.chart .series {
+  stroke: var(--viz-4);
+  stroke-width: 2;
+  fill: none;
+  stroke-linejoin: round;
+}
+.chart .band {
+  fill: var(--caution-muted);
+}
+.chart .band-edge {
+  stroke: var(--caution);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.chart text {
+  font-family: var(--mono);
+  font-size: 11px; /* viewBox units; renders at 13px+ at container width */
+  fill: var(--ink-muted);
+}
+.chart text.callout {
+  fill: var(--caution-ink);
+}
+.chart--compact text {
+  font-size: 15px; /* small viewBox (360): keeps rendered text at 13px+ */
+}
+.chart-tip {
+  position: absolute;
+  pointer-events: none;
+  background: var(--surface-raised);
+  border: var(--border) solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-pop);
+  padding: var(--sp-2) var(--sp-3);
+  font-family: var(--mono);
+  font-size: var(--t-caption);
+  white-space: nowrap;
+  transform: translate(-50%, calc(-100% - 10px));
+  z-index: var(--z-popover);
+}
+
+/* ---------------------------------------------------------------- ledger */
+
+.ledger-lines {
+  display: grid;
+  border: var(--border) solid var(--hairline);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+.ledger-line {
+  border-bottom: var(--border) solid var(--hairline);
+}
+.ledger-line:last-child {
+  border-bottom: 0;
+}
+.ledger-line > button {
+  all: unset;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  padding: var(--sp-3) var(--sp-4);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.ledger-line > button:hover {
+  background: var(--hover);
+}
+.ledger-line > button:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+.ledger-line .num {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.ledger-line .chev {
+  color: var(--ink-faint);
+  display: inline-flex;
+  transition: transform var(--dur-in) var(--ease-control);
+}
+.ledger-line[data-open='true'] .chev {
+  transform: rotate(90deg);
+}
+.ledger-line .detail {
+  padding: var(--sp-2) var(--sp-4) var(--sp-4);
+  background: var(--surface-sunken);
+  border-top: var(--border) solid var(--hairline);
+  display: grid;
+  gap: var(--sp-2);
+}
+.dp-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-3);
+  font-size: var(--t-caption);
+}
+.dp-row .num {
+  font-family: var(--mono);
+}
+.dp-row a {
+  color: var(--accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.dp-row a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ------------------------------------------------------------- field app */
+
+.field-shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: var(--sp-4);
+  gap: var(--sp-4);
+}
+.field-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.field-head h1 {
+  font-family: var(--serif);
+  font-size: var(--t-head);
+  font-weight: var(--w-regular);
+  margin: 0;
+}
+.field-form {
+  display: grid;
+  gap: var(--sp-4);
+  align-content: start;
+}
+.field-form .ui-input,
+.field-form select.ui-input {
+  min-height: var(--control-h-lg);
+}
+.net-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--positive);
+  display: inline-block;
+}
+.net-dot[data-offline='true'] {
+  background: var(--caution);
+}
+.outbox {
+  display: grid;
+  gap: var(--sp-3);
+}
+.outbox-item {
+  background: var(--surface);
+  border: var(--border) solid var(--hairline);
+  border-radius: var(--radius);
+  padding: var(--sp-3) var(--sp-4);
+  display: grid;
+  gap: var(--sp-1);
+}
+.outbox-item .row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-3);
+}
+.outbox-item .mono {
+  font-family: var(--mono);
+  font-size: var(--t-caption);
+  color: var(--ink-muted);
+}
+
+/* ------------------------------------------------------------ public page */
+
+.pub {
+  min-height: 100dvh;
+  display: grid;
+  align-content: start;
+  gap: var(--sp-8);
+  max-width: 880px;
+  margin: 0 auto;
+  padding: var(--sp-8) var(--sp-5) var(--sp-12);
+}
+.pub-head {
+  display: grid;
+  gap: var(--sp-3);
+  justify-items: start;
+}
+.pub-head h1 {
+  font-family: var(--serif);
+  font-size: var(--t-display);
+  font-weight: var(--w-regular);
+  line-height: var(--lh-tight);
+  margin: 0;
+}
+.pub-head .where {
+  color: var(--ink-muted);
+}
+.pub-foot {
+  color: var(--ink-muted);
+  font-size: var(--t-caption);
+  border-top: var(--border) solid var(--hairline);
+  padding-top: var(--sp-4);
+}
+
+/* ---------------------------------------------------------------- enter */
+
+.enter {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--sp-5);
+}
+.enter form,
+.enter-form {
+  width: min(380px, 100%);
+  display: grid;
+  gap: var(--sp-4);
+  background: var(--surface);
+  border: var(--border) solid var(--hairline);
+  border-radius: var(--radius);
+  padding: var(--sp-7);
+}
+.enter h1 {
+  font-family: var(--serif);
+  font-size: var(--t-head);
+  font-weight: var(--w-regular);
+  margin: 0;
+}
+/* The CMHQ mark beside the product name: OpenChar has no mark of its own. */
+.enter-brand,
+.field-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  color: var(--ink);
+}
+.enter-brand svg,
+.field-brand svg,
+.pub-head > svg {
+  flex: none;
+}
+.enter-brand--small {
+  gap: var(--sp-2);
+  font-size: var(--t-ui-sm);
+  font-weight: var(--w-medium);
+}
+
+/* ------------------------------------------------------------- utilities */
+
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+.muted {
+  color: var(--ink-muted);
+}
+.empty {
+  border: var(--border) dashed var(--hairline-strong);
+  border-radius: var(--radius);
+  padding: var(--sp-9) var(--sp-5);
+  text-align: center;
+  color: var(--ink-muted);
+  display: grid;
+  gap: var(--sp-2);
+  justify-items: center;
+}
+.empty b {
+  color: var(--ink);
+  font-weight: var(--w-strong);
+}
+.gatechip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* The ui-inset owns the scroll; keep page width honest on small screens. */
+.ui-inset {
+  min-width: 0;
+}
+
+.invite-link {
+  display: block;
+  margin-top: var(--sp-2);
+  word-break: break-all;
+  font-size: var(--t-ui-sm);
+}
+
+.public-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-top: var(--sp-4);
+  font-size: var(--t-ui-sm);
+}
+
+.export-links {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--t-ui-sm);
+  color: var(--ink-muted);
+}

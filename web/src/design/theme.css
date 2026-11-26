@@ -1,0 +1,309 @@
+/* =========================================================================
+   CMHQ · Instrument — theme layer
+   -------------------------------------------------------------------------
+   The tokens, and nothing but the tokens. Every component style in
+   system.css reads from this file and never hardcodes a colour, a size or a
+   duration, so a new surface re-skins by overriding declarations here rather
+   than by touching a component.
+
+   Scope. Everything hangs off the root class .cmhq, which goes on <body> or
+   on whatever element wraps the system. Tokens are deliberately unprefixed
+   (--ink, not --cmhq-ink) so they match the names the public site already
+   uses; scoping to .cmhq is what keeps them from leaking into a host app.
+
+   Modes. .cmhq is dark by default. data-theme="paper" or data-theme="ink" on
+   any element re-declares the palette for that element and its subtree, so a
+   light panel inside a dark page is a wrapper, not a stylesheet.
+   ========================================================================= */
+
+.cmhq {
+  /* ---------------------------------------------------------------- ground */
+  /* The page itself, then each step up out of it. Three steps is the whole
+     ladder: anything needing a fourth is asking for a border instead. */
+  --base: #0f140f;
+  --surface: #1b221b;
+  --surface-raised: #232c23;
+  --surface-sunken: #131813;
+
+  /* Three grounds that are not steps on that ladder, because light and dark
+     move them in opposite directions relative to the page. A form field is
+     recessed on a dark ground and white on a light one; a hover darkens on paper
+     and lightens in the field. Deriving either from the ladder is what made
+     the light mode look like a 1995 dialog box. */
+  --field: #131813; /* the fill inside a form control */
+  --hover: #232c23; /* a row or control under the pointer */
+  --fill: #232c23; /* a neutral filled area: progress track, skeleton */
+
+  /* ------------------------------------------------------------------ ink */
+  --ink: #eaeee7;
+  --ink-muted: #99a196; /* 5.9:1 on --base, so it carries running text */
+  --ink-faint: #6c766b; /* decoration and disabled only, never a sentence */
+
+  /* -------------------------------------------------------------- hairline */
+  --hairline: #2c352c; /* structural division */
+  --hairline-strong: #5b685a; /* the edge of a control */
+
+  /* --------------------------------------------------------------- accent */
+  --accent: #d4ee40;
+  --accent-hover: #e7fe83;
+  --accent-muted: #2f3a15; /* accent as a ground, for fills under ink */
+  --accent-ink: #d4ee40; /* accent as text on --base */
+  --on-accent: #0f140f; /* text on an accent fill */
+
+  /* --------------------------------------------------------------- status */
+  /* Each status is a triple: the line, the ground it fills, the ink it takes
+     on that ground. Components use the triple; nothing computes a tint. */
+  --positive: #56d393;
+  --positive-muted: #14291f;
+  --positive-ink: #56d393;
+  --caution: #f5bb4e;
+  --caution-muted: #2e2413;
+  --caution-ink: #f5bb4e;
+  --negative: #f2716a;
+  --negative-muted: #2e1817;
+  --negative-ink: #f2716a;
+  --info: #7fb8d8;
+  --info-muted: #16242c;
+  --info-ink: #7fb8d8;
+
+  /* ------------------------------------------------------------------ viz */
+  --viz-1: #2c7561;
+  --viz-2: #3a9466;
+  --viz-3: #46b651;
+  --viz-4: #90cd4d;
+  --viz-5: #cee65b;
+
+  /* ------------------------------------------------------------- utility */
+  --focus: var(--accent);
+  --overlay: rgb(9 12 9 / 0.72);
+  --logo-ink: brightness(0) invert(1);
+
+  /* ------------------------------------------------------------- families */
+  /* Fall back all the way down. A host that never loads the webfonts still
+     gets the right shape of type, which is most of the identity. */
+  --serif: var(--font-lp3-serif), 'Source Serif 4', Georgia, serif;
+  --sans: var(--font-lp3-sans), 'Instrument Sans', system-ui, -apple-system, sans-serif;
+  --mono: var(--font-lp3-mono), 'Spline Sans Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* ---------------------------------------------------------------- scale */
+  /* Interface type is fixed, not fluid. A control that changes size with the
+     viewport is a control you cannot aim at. Only the page-level display
+     sizes below clamp. */
+  --t-display: clamp(2rem, 3.1vw, 2.5rem);
+  --t-title: clamp(1.75rem, 3vw, 2.5rem);
+  --t-head: 1.1875rem;
+  --t-lede: clamp(1.125rem, 1.5vw, 1.3125rem);
+  --t-body: 1.09375rem; /* 17.5px */
+  --t-ui: 0.9375rem; /* 15px — the size every control sets at */
+  --t-ui-sm: 0.875rem; /* 14px */
+  --t-caption: 0.8125rem; /* 13px — the floor for a sentence */
+  --t-label: 0.75rem; /* 12px mono caps */
+  --t-micro: 0.6875rem; /* 11px mono caps — stamps only, never prose */
+
+  --lh-tight: 1.15;
+  --lh-ui: 1.35;
+  --lh-body: 1.6;
+
+  --ls-label: 0.08em;
+  --ls-micro: 0.06em;
+
+  --w-regular: 400;
+  --w-medium: 500;
+  --w-strong: 550;
+
+  /* ---------------------------------------------------------------- space */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 32px;
+  --sp-8: 40px;
+  --sp-9: 48px;
+  --sp-10: 64px;
+  --sp-11: 80px;
+  --sp-12: 96px;
+
+  /* ---------------------------------------------------------------- shape */
+  /* Software is not a printed record. The public site is set at zero radius
+     because a drawn edge is right on a page with six elements and a lot of
+     air; at sixty elements the same edge reads as a grid of hard rectangles —
+     flat, square, uppercase and neon is the Metro look, and it is tiring.
+     Application surfaces get a radius scale and a shadow instead.
+
+     Set --radius and --radius-control to 0 to get the drawn system back. */
+  --radius: 10px; /* panels, cards, dialogs, menus */
+  --radius-control: 8px; /* buttons, inputs, selects */
+  --radius-sm: 6px; /* checkboxes, small marks */
+  --radius-pill: 999px; /* badges */
+  --border: 1px;
+
+  /* --------------------------------------------------------------- control */
+  --control-h-sm: 32px;
+  --control-h: 40px;
+  --control-h-lg: 44px; /* the comfortable target, and the page-level default */
+  --control-pad: var(--sp-4);
+
+  /* -------------------------------------------------------------- sidebar */
+  --sidebar-w: 260px;
+  --sidebar-w-rail: 56px; /* collapsed: one control wide, icons only */
+  --topbar-h: 56px;
+
+  /* --------------------------------------------------------------- motion */
+  --ease-control: cubic-bezier(0.2, 0, 0.38, 0.9);
+  --ease-travel: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-panel: cubic-bezier(0.19, 1, 0.22, 1);
+  --dur-in: 120ms;
+  --dur-out: 90ms;
+  --dur-travel: 180ms;
+  --dur-panel: 400ms;
+
+  /* ------------------------------------------------------------ elevation */
+  /* Never a glow. Four steps: a card barely lifts, a popover floats, a modal
+     sits well above the page. */
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.28);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.32), 0 1px 2px rgb(0 0 0 / 0.24);
+  --shadow-pop: 0 1px 2px rgb(0 0 0 / 0.3), 0 12px 32px rgb(0 0 0 / 0.4);
+  --shadow-panel: 0 24px 64px rgb(0 0 0 / 0.5);
+
+  /* ---------------------------------------------------------------- layer */
+  --z-sticky: 20;
+  --z-popover: 40;
+  --z-overlay: 50;
+  --z-toast: 60;
+
+  /* --------------------------------------------------------------- measure */
+  --measure: 68ch;
+  --measure-tight: 44ch;
+  --container: 1240px;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+}
+
+/* ------------------------------------------------------------------ paper --
+   The light mode. Not an inversion: the accent darkens to hold contrast as
+   ink, and the status colours are re-picked against a light ground rather
+   than reused, because the dark ones fail AA there. */
+.cmhq [data-theme='paper'],
+.cmhq[data-theme='paper'] {
+  /* Warm neutral, not green. A green cast reads as instrument at 5% lightness
+     and as institutional software at 95%; the brand is carried by the accent
+     and the data colours, which keep theirs. */
+  --base: #f7f6f3; /* the paper */
+  --surface: #ffffff; /* a card sits above the paper, so it is whiter */
+  --surface-raised: #ffffff; /* popovers, which float on a shadow instead */
+  --surface-sunken: #f0efeb; /* genuinely recessed: the sidebar, a code block */
+
+  --field: #ffffff; /* a form field is a white well cut into the paper */
+  --hover: #edece7; /* on paper a hover darkens */
+  --fill: #e7e5de;
+
+  --ink: #1b1a16;
+  --ink-muted: #5c5a52; /* 6.4:1 on the paper, so it carries running text */
+  --ink-faint: #8c8a80; /* 3.2:1 — stamps and rules, never a sentence */
+
+  --hairline: #e6e4dc;
+  --hairline-strong: #8b8980; /* 3.5:1 on white: a control edge is essential */
+
+  --accent: #d5f042;
+  --accent-hover: #c7e02b;
+  --accent-muted: #eef6cf;
+  --accent-ink: #186025;
+  --on-accent: #131c13;
+
+  --positive: #14764a;
+  --positive-muted: #e6f1ea;
+  --positive-ink: #14764a;
+  --caution: #8a5a04; /* darkened from #9a6405: that failed AA on --surface */
+  --caution-muted: #f6efdd;
+  --caution-ink: #8a5a04;
+  --negative: #a12628;
+  --negative-muted: #f8e7e6;
+  --negative-ink: #a12628;
+  --info: #1f5f7d;
+  --info-muted: #e4eef3;
+  --info-ink: #1f5f7d;
+
+  --viz-1: #123b30;
+  --viz-2: #1d5438;
+  --viz-3: #276f2e;
+  --viz-4: #5a832e;
+  --viz-5: #869639;
+
+  --overlay: rgb(28 26 22 / 0.38);
+  --logo-ink: brightness(0);
+
+  --shadow-xs: 0 1px 2px rgb(28 26 22 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(28 26 22 / 0.07), 0 1px 2px rgb(28 26 22 / 0.04);
+  --shadow-pop: 0 1px 2px rgb(28 26 22 / 0.07), 0 12px 32px rgb(28 26 22 / 0.1);
+  --shadow-panel: 0 24px 64px rgb(28 26 22 / 0.16);
+}
+
+/* -------------------------------------------------------------------- ink --
+   Proof that the system is not the lime. Every component below is unchanged;
+   only this block moves, and the whole thing reads as a different product.
+   Doubles as a high-contrast mode: ink on ground clears 15:1. */
+.cmhq [data-theme='ink'],
+.cmhq[data-theme='ink'] {
+  --base: #08090a;
+  --surface: #131517;
+  --surface-raised: #1c1f22;
+  --surface-sunken: #050607;
+
+  --field: #050607;
+  --hover: #1c1f22;
+  --fill: #1c1f22;
+
+  --ink: #f4f6f7;
+  --ink-muted: #a8aeb3;
+  --ink-faint: #71787e;
+
+  --hairline: #262a2e;
+  --hairline-strong: #6a7278;
+
+  --accent: #f4f6f7;
+  --accent-hover: #ffffff;
+  --accent-muted: #26292c;
+  --accent-ink: #f4f6f7;
+  --on-accent: #08090a;
+
+  --positive: #7bd6a4;
+  --positive-muted: #12211a;
+  --positive-ink: #7bd6a4;
+  --caution: #e5c07b;
+  --caution-muted: #221d12;
+  --caution-ink: #e5c07b;
+  --negative: #e88b84;
+  --negative-muted: #221514;
+  --negative-ink: #e88b84;
+  --info: #8fb6cc;
+  --info-muted: #121b21;
+  --info-ink: #8fb6cc;
+}
+
+/* ------------------------------------------------------------------ paint --
+   A mode wrapper has to actually take its own ground, or a light panel inside
+   a dark page is light-coloured text on a dark background.
+
+   Split out of the token blocks above and weighted with :where() so it comes
+   to exactly one class — the same as .ui-overlay, .ui-dialog, .ui-menu and
+   the rest, which are declared later in system.css and therefore win. At the
+   token blocks' own specificity this rule beat them, and a portalled dialog
+   scrim in light mode came out as an opaque sheet of --base rather than a
+   translucent scrim. */
+.cmhq:where([data-theme]),
+.cmhq :where([data-theme]) {
+  background: var(--base);
+  color: var(--ink);
+}
+
+/* Anyone who asked for less movement gets less movement, everywhere, without
+   each component having to remember. */
+@media (prefers-reduced-motion: reduce) {
+  .cmhq {
+    --dur-in: 1ms;
+    --dur-out: 1ms;
+    --dur-travel: 1ms;
+    --dur-panel: 1ms;
+  }
+}

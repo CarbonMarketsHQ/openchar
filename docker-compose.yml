@@ -1,0 +1,91 @@
+# OpenChar on one machine: Postgres, the API and the web app.
+#
+#   cp .env.example .env      # then set the two secrets in it
+#   docker compose up -d      # http://localhost:3000
+#
+# For HTTPS with automatic Let's Encrypt certificates, set DOMAIN in .env and
+# add `--profile tls`. Development uses only the db service:
+# `docker compose up -d db`, then `npm run dev:server` and `npm run dev:web`.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: biochar
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-biochar}
+      POSTGRES_DB: biochar
+    ports:
+      - '127.0.0.1:5466:5432'
+    volumes:
+      - biochar-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U biochar -d biochar']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./server
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://biochar:${POSTGRES_PASSWORD:-biochar}@db:5432/biochar
+      API_TOKEN: ${API_TOKEN:-}
+      API_TOKEN_PREVIOUS: ${API_TOKEN_PREVIOUS:-}
+      PORT: '8080'
+      FILES_DIR: /app/data/files
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      SIGNUP_MODE: ${SIGNUP_MODE:-closed}
+      MAIL_WEBHOOK_URL: ${MAIL_WEBHOOK_URL:-}
+      RESET_WEBHOOK_URL: ${RESET_WEBHOOK_URL:-} # older name for MAIL_WEBHOOK_URL
+      SIGNUP_URL: ${SIGNUP_URL:-} # set by an extension that brings its own sign-up page
+      OPENCHAR_EXTENSIONS: ${OPENCHAR_EXTENSIONS:-}
+      AUTH_RATE_MAX: ${AUTH_RATE_MAX:-}
+      MQTT_REFRESH_MS: ${MQTT_REFRESH_MS:-}
+      ISOMETRIC_API_KEY: ${ISOMETRIC_API_KEY:-}
+      ISOMETRIC_CLIENT_SECRET: ${ISOMETRIC_CLIENT_SECRET:-}
+      ISOMETRIC_BASE_URL: ${ISOMETRIC_BASE_URL:-}
+    volumes:
+      - openchar-files:/app/data
+    ports:
+      # Only the web app needs the API; keep it off the network unless you
+      # run the web somewhere else (then bind 0.0.0.0 behind a firewall).
+      - '${API_BIND:-127.0.0.1}:8080:8080'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:8080
+      API_TOKEN: ${API_TOKEN:-}
+      PUBLIC_PROJECT_ID: ${PUBLIC_PROJECT_ID:-}
+    ports:
+      - '${WEB_BIND:-127.0.0.1}:3000:3000'
+    depends_on:
+      - api
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    profiles: ['tls']
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    command: >
+      sh -c 'printf "%s {\n  reverse_proxy web:3000\n}\n" "$$DOMAIN" > /etc/caddy/Caddyfile
+      && caddy run --config /etc/caddy/Caddyfile'
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - caddy-data:/data
+    depends_on:
+      - web
+
+volumes:
+  biochar-db:
+  openchar-files:
+  caddy-data:
