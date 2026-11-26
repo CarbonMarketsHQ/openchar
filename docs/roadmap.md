@@ -3,13 +3,11 @@
 What OpenChar does today is in the [README](../README.md). This page lists the
 features planned next, in the order biochar producers preparing for their
 first verification need them. When a feature is released it moves to the
-changelog, together with the automated tests that prove it works.
+[changelog](../CHANGELOG.md), together with the automated tests that prove it
+works.
 
 ## Records and evidence
 
-- Document uploads by type (supplier declaration, land record, invoice,
-  weighbridge slip), attached to consignments, lots and batches from the
-  console.
 - An operator shift log: who ran the reactor, what happened, the handover,
   and downtime by cause and duration.
 - A calibration register for every instrument (scales, thermocouples,
