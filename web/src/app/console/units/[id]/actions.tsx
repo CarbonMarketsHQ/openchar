@@ -79,3 +79,21 @@ export function ApplyUnit({ unitId }: { unitId: string }) {
     />
   )
 }
+
+export function ReturnUnit({ unitId, locations }: { unitId: string; locations: { id: string; name: string }[] }) {
+  return (
+    <FormDialog
+      trigger="Return to storage"
+      triggerVariant="outline"
+      triggerTestId="unit-return"
+      title={`${unitId} came back`}
+      description="A delivered unit that was not used goes back into stock."
+      path={`/units/${unitId}/return`}
+      submitTestId="unit-return-save"
+      fields={[
+        { name: 'locationId', label: 'Back to', type: 'select', required: true, options: locations.map((l) => ({ value: l.id, label: l.name })), testId: 'unit-return-to' },
+        { name: 'reason', label: 'Why it came back', testId: 'unit-return-reason' },
+      ]}
+    />
+  )
+}

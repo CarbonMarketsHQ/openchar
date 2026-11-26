@@ -3,7 +3,7 @@ import { Badge, Card, CardBody, CardHead, CardTitle, KeyValues } from '@/design'
 import { api } from '@/lib/api'
 import { ApiDown, EmptyState, fmtDate, fmtKg } from '../../bits'
 import { statusLabel } from '@/lib/labels'
-import { ApplyUnit, DeliverUnit, MergeUnit, SplitUnit } from './actions'
+import { ApplyUnit, DeliverUnit, MergeUnit, ReturnUnit, SplitUnit } from './actions'
 import { UnitQr } from './qr'
 
 type Unit = {
@@ -25,11 +25,13 @@ function eventDetail(kind: string, d: Record<string, unknown>): string {
   const kg = typeof d.massKg === 'number' ? fmtKg(d.massKg) : null
   const list = (v: unknown) => (Array.isArray(v) ? v.join(', ') : String(v))
   if (kind === 'created' && d.coProduct) return `${kg} of ${d.coProduct} from batch ${d.fromBatch}`
-  if (kind === 'created' && d.fromBatch) return `${kg} from batch ${d.fromBatch}`
+  if (kind === 'created' && d.fromBatch) return `${kg} from batch ${d.fromBatch}${d.at ? `, into ${d.at}` : ''}`
   if (kind === 'created' && d.splitFrom) return `${kg} split from ${d.splitFrom}`
   if (kind === 'created' && d.mergedFrom) return `${kg} merged from ${list(d.mergedFrom)}`
   if ((kind === 'split' || kind === 'merged') && d.into) return `Into ${list(d.into)}`
   if (kind === 'delivered' && d.toName) return `To ${d.toName}`
+  if (kind === 'moved' && d.to) return `From ${d.from} to ${d.to}`
+  if (kind === 'returned' && d.to) return `Back to ${d.to}${d.reason ? `: ${d.reason}` : ''}`
   if (kind === 'applied' && d.farmName) return `At ${d.farmName}`
   return Object.entries(d)
     .map(([k, v]) => `${k}: ${list(v)}`)
@@ -46,6 +48,8 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
     if (!health) return <ApiDown />
     return <EmptyState title={`No unit called ${id}`} />
   }
+  const storage = await api<{ locations: { id: string; name: string }[] }>('/storage')
+  const locations = (storage?.locations ?? []).map((l) => ({ id: l.id, name: l.name }))
   const siblings =
     unit.status === 'in-storage' && unit.originBatch
       ? ((await api<{ id: string; massKg: number; status: string }[]>(`/units?batch=${unit.originBatch}`)) ?? [])
@@ -68,6 +72,7 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
         {unit.status === 'in-storage' && <MergeUnit unitId={unit.id} candidates={siblings} />}
         {unit.status === 'in-storage' && <DeliverUnit unitId={unit.id} />}
         {(unit.status === 'in-storage' || unit.status === 'delivered') && <ApplyUnit unitId={unit.id} />}
+        {unit.status === 'delivered' && locations.length > 0 && <ReturnUnit unitId={unit.id} locations={locations} />}
       </div>
 
       <div style={{ display: 'grid', gap: 'var(--sp-5)', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', alignItems: 'start' }}>

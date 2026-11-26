@@ -286,6 +286,13 @@ export const IconSink = (p: IconProps) => (
   </Icon>
 )
 
+export const IconBox = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M2.5 5 8 2.5 13.5 5v6L8 13.5 2.5 11z" />
+    <path d="M2.5 5 8 7.5 13.5 5M8 7.5v6" />
+  </Icon>
+)
+
 export const IconClock = (p: IconProps) => (
   <Icon {...p}>
     <circle cx="8" cy="8" r="5.5" />
