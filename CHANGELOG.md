@@ -4,6 +4,13 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Soil application in the field app
+- The field app now has a second mode, Soil application, for the person spreading the biochar. It records the dispatch the biochar came from, the farm, the mass applied, a GPS point, up to four photos and an optional short video.
+- Walking around the field with the phone records its boundary, and the app calculates the area. The area can also be typed in.
+- The farmer gives their name, confirms a short declaration and signs on the screen.
+- Soil application works offline, like gate capture. Photos, video and the signature are saved on the phone and upload with the record once online. The batch page then shows the evidence for each application.
+- Tests: W2 in `evals/e2e/field.spec.ts`.
+
 ### Reports
 - A Reports page lists a report for each batch and one for each of the last six months.
 - Batch reports include the ledger and its evidence, production and balance checks, feedstock, lab results, co-products, units and end use, and fuel.

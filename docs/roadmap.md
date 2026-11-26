@@ -14,10 +14,7 @@ works.
 
 ## End use and carbon sinks
 
-- A soil-application mode in the field app for buyers and farmers: GPS
-  position and photos where the biochar is spread, short videos, a signed
-  declaration, and field boundaries recorded by walking around the field or
-  drawing on a map.
+- Drawing a field boundary on a map in the field app, next to walking it.
 - A register of carbon sinks by type (soil, concrete, filtration and other
   uses), each with its own accounting under the registry's rules.
 - Storage locations, with stock per location, transfers between locations,
