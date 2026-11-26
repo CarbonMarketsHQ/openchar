@@ -61,8 +61,12 @@ export function registerUnitRoutes(app: FastifyInstance) {
     const { code } = req.params as { code: string }
     const batch = await resolveBatch(ctx.projectId, code)
     if (!batch) return reply.code(404).send({ error: 'batch not found' })
-    const b = req.body as { count?: number; massKgEach?: number; kind?: string }
+    const b = req.body as { count?: number; massKgEach?: number; kind?: string; locationId?: string }
     const count = Math.min(Math.max(1, Math.round(b.count ?? 1)), 200)
+    const loc = b.locationId
+      ? (await pool.query(`SELECT id, name FROM storage_locations WHERE id = $1 AND project_id = $2`, [b.locationId, ctx.projectId])).rows[0]
+      : null
+    if (b.locationId && !loc) return reply.code(404).send({ error: 'That location is not in this project.' })
     if (typeof b.massKgEach !== 'number' || b.massKgEach <= 0) {
       return reply.code(400).send({ error: 'massKgEach must be a positive number' })
     }
@@ -70,10 +74,10 @@ export function registerUnitRoutes(app: FastifyInstance) {
     for (let i = 0; i < count; i++) {
       const id = await nextUnitId(ctx.projectId)
       await pool.query(
-        `INSERT INTO units (id, project_id, origin_batch_id, kind, mass_kg) VALUES ($1, $2, $3, $4, $5)`,
-        [id, ctx.projectId, batch.id, b.kind ?? 'bag', b.massKgEach]
+        `INSERT INTO units (id, project_id, origin_batch_id, kind, mass_kg, location_id) VALUES ($1, $2, $3, $4, $5, $6)`,
+        [id, ctx.projectId, batch.id, b.kind ?? 'bag', b.massKgEach, loc?.id ?? null]
       )
-      await addEvent(id, 'created', { fromBatch: code, massKg: b.massKgEach })
+      await addEvent(id, 'created', { fromBatch: code, massKg: b.massKgEach, ...(loc ? { at: loc.name } : {}) })
       created.push(id)
     }
     return { created }

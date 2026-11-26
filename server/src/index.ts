@@ -36,6 +36,7 @@ import { registerTrendRoutes } from './trends.js'
 import { registerReportRoutes } from './reports.js'
 import { recordFieldApplication, registerApplicationRoutes, type ApplicationPayload } from './applications.js'
 import { SINKS, registerSinkRoutes } from './sinks.js'
+import { registerStorageRoutes } from './storage.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -107,6 +108,7 @@ registerTrendRoutes(app)
 registerReportRoutes(app)
 registerApplicationRoutes(app)
 registerSinkRoutes(app)
+registerStorageRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 

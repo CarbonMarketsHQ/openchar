@@ -228,6 +228,18 @@ export async function migrate(): Promise<void> {
       source text NOT NULL DEFAULT 'manual',
       UNIQUE (project_id, meter, read_at)
     );
+    -- Storage locations and stock counts.
+    CREATE TABLE IF NOT EXISTS storage_locations (
+      id text PRIMARY KEY, project_id text NOT NULL REFERENCES projects(id),
+      name text NOT NULL, kind text NOT NULL,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS stock_counts (
+      id text PRIMARY KEY, project_id text NOT NULL REFERENCES projects(id),
+      location_id text NOT NULL REFERENCES storage_locations(id) ON DELETE CASCADE,
+      found text[] NOT NULL, missing text[] NOT NULL, extra text[] NOT NULL,
+      counted_by text, counted_at timestamptz NOT NULL DEFAULT now()
+    );
     -- Written by deploy/backup/backup.sh after each good run; platform-wide,
     -- so seeding never truncates it.
     CREATE TABLE IF NOT EXISTS backup_runs (
@@ -257,6 +269,7 @@ export async function migrate(): Promise<void> {
   await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS video_ref text`)
   await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS declaration jsonb`)
   await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS sink text NOT NULL DEFAULT 'soil'`)
+  await pool.query(`ALTER TABLE units ADD COLUMN IF NOT EXISTS location_id text REFERENCES storage_locations(id) ON DELETE SET NULL`)
 }
 
 /** Canonical JSON: keys sorted recursively, so a jsonb round-trip through

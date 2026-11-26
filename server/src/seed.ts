@@ -188,6 +188,13 @@ async function seed() {
     )
   }
 
+  // Two places biochar is kept at the plant.
+  await pool.query(
+    `INSERT INTO storage_locations (id, project_id, name, kind) VALUES
+     ('loc-silo', $1, 'Silo 1', 'silo'), ('loc-shed', $1, 'Bagging shed', 'warehouse')`,
+    [DEMO.projectId]
+  )
+
   // The calibration register: one scale due within the month, the moisture meter lapsed.
   const day =(daysAgo: number) => new Date(Date.now() - daysAgo * DAY).toISOString().slice(0, 10)
   const due = (daysAgo: number, interval: number) => day(daysAgo - interval)
