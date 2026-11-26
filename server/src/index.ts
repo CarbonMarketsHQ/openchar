@@ -30,6 +30,7 @@ import { registerCalibrationRoutes, sendCalibrationAlerts } from './calibration.
 import { registerDuplicateRoutes } from './duplicates.js'
 import { distanceFor, plantPoint, registerDistanceRoutes } from './distances.js'
 import { registerEnergyRoutes } from './energy.js'
+import { registerEmissionsRoutes } from './emissions.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -95,6 +96,7 @@ registerCalibrationRoutes(app)
 registerDuplicateRoutes(app)
 registerDistanceRoutes(app)
 registerEnergyRoutes(app)
+registerEmissionsRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 

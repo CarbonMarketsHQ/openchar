@@ -22,12 +22,12 @@ export const FUELS: Record<string, { unit: 'l' | 'kg'; kgCo2ePerUnit: number; ba
 }
 export const FUEL_USES = ['reactor-startup', 'generator', 'loader', 'vehicle-trip', 'other'] as const
 
-const co2eT = (fuel: string, qty: number) => ((FUELS[fuel]?.kgCo2ePerUnit ?? 0) * qty) / 1000
+export const co2eT = (fuel: string, qty: number) => ((FUELS[fuel]?.kgCo2ePerUnit ?? 0) * qty) / 1000
 const round = (n: number, d = 4) => Math.round(n * 10 ** d) / 10 ** d
 
 /** The meter's cumulative kWh at `at`, interpolated between the readings on
  * either side, or null when the readings do not reach that far. */
-function meterAt(readings: { at: number; kwh: number }[], at: number): number | null {
+export function meterAt(readings: { at: number; kwh: number }[], at: number): number | null {
   let before: { at: number; kwh: number } | null = null
   let after: { at: number; kwh: number } | null = null
   for (const r of readings) {
