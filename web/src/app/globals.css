@@ -962,3 +962,33 @@ body {
   gap: var(--sp-3);
   flex-wrap: wrap;
 }
+
+/* --------------------------------------------------------------- trends */
+
+.trend-grid {
+  display: grid;
+  gap: var(--sp-5);
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+.trend-unit {
+  font-weight: var(--w-regular);
+  font-size: var(--t-caption);
+}
+.mini-bars {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.mini-fill {
+  fill: var(--accent-ink);
+}
+.mini-gap {
+  fill: none;
+  stroke: var(--ink-muted);
+  stroke-dasharray: 3 3;
+}
+.mini-val {
+  fill: var(--ink);
+  font-size: 13px;
+  font-family: var(--mono);
+}

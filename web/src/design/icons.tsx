@@ -272,6 +272,13 @@ export const IconBars = (p: IconProps) => (
   </Icon>
 )
 
+export const IconTrend = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M1.5 12.5 5.5 8.5l3 2.5 6-6.5" />
+    <path d="M10.5 4.5h4v4" />
+  </Icon>
+)
+
 export const IconClock = (p: IconProps) => (
   <Icon {...p}>
     <circle cx="8" cy="8" r="5.5" />

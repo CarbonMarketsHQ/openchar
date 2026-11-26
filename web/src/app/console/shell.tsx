@@ -16,6 +16,7 @@ import {
   IconLayers,
   IconLog,
   IconPaperclip,
+  IconTrend,
   IconMoon,
   IconSettings,
   IconSun,
@@ -42,11 +43,15 @@ const NAV = [
   { href: '/console', label: 'Overview', icon: <IconGauge /> },
   { href: '/console/gate', label: 'Gate', icon: <IconLayers /> },
   { href: '/console/batches', label: 'Batches', icon: <IconKiln /> },
-  { href: '/console/shifts', label: 'Shift log', icon: <IconLog /> },
-  { href: '/console/calibration', label: 'Calibration', icon: <IconBalance /> },
-  { href: '/console/energy', label: 'Energy', icon: <IconFuel /> },
   { href: '/console/lab', label: 'Lab', icon: <IconFlask /> },
+  { href: '/console/shifts', label: 'Shift log', icon: <IconLog /> },
+  { href: '/console/energy', label: 'Energy', icon: <IconFuel /> },
+  { href: '/console/calibration', label: 'Calibration', icon: <IconBalance /> },
   { href: '/console/documents', label: 'Documents', icon: <IconPaperclip /> },
+]
+
+const REPORTING = [
+  { href: '/console/trends', label: 'Trends', icon: <IconTrend /> },
   { href: '/console/emissions', label: 'Emissions', icon: <IconBars /> },
   { href: '/console/compliance', label: 'Compliance', icon: <IconBook /> },
   { href: '/console/certify', label: 'Certify', icon: <IconUpload /> },
@@ -142,6 +147,13 @@ export function ConsoleShell({
                 icon={item.icon}
                 active={item.href === '/console' ? pathname === '/console' : pathname.startsWith(item.href)}
               >
+                {item.label}
+              </SidebarItem>
+            ))}
+          </SidebarGroup>
+          <SidebarGroup label="Reporting">
+            {REPORTING.map((item) => (
+              <SidebarItem key={item.href} href={item.href} icon={item.icon} active={pathname.startsWith(item.href)}>
                 {item.label}
               </SidebarItem>
             ))}
