@@ -251,6 +251,11 @@ export async function migrate(): Promise<void> {
   await pool.query(`ALTER TABLE batches ADD COLUMN IF NOT EXISTS gas_mass_kg numeric`)
   await pool.query(`ALTER TABLE units ADD COLUMN IF NOT EXISTS material text NOT NULL DEFAULT 'biochar'`)
   await pool.query(`ALTER TABLE units ADD COLUMN IF NOT EXISTS co_product_id text REFERENCES co_products(id) ON DELETE SET NULL`)
+  await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS gps_lat numeric`)
+  await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS gps_lng numeric`)
+  await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS photo_refs jsonb`)
+  await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS video_ref text`)
+  await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS declaration jsonb`)
 }
 
 /** Canonical JSON: keys sorted recursively, so a jsonb round-trip through

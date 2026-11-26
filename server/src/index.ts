@@ -34,6 +34,7 @@ import { registerEmissionsRoutes } from './emissions.js'
 import { registerBalanceRoutes } from './balance.js'
 import { registerTrendRoutes } from './trends.js'
 import { registerReportRoutes } from './reports.js'
+import { recordFieldApplication, registerApplicationRoutes, type ApplicationPayload } from './applications.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -103,6 +104,7 @@ registerEmissionsRoutes(app)
 registerBalanceRoutes(app)
 registerTrendRoutes(app)
 registerReportRoutes(app)
+registerApplicationRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 
@@ -366,6 +368,7 @@ app.post('/sync', async (req, reply) => {
   }
   if (!Array.isArray(body.events)) return reply.code(400).send({ error: 'events[] required' })
   const accepted = await appendEvents(ctx.projectId, body.events)
+  const rejected: { id: string; error: string }[] = []
   for (const e of body.events) {
     if (e.kind === 'consignment-captured') {
       const p = e.payload as {
@@ -394,8 +397,12 @@ app.post('/sync', async (req, reply) => {
         ]
       )
     }
+    if (e.kind === 'application-captured') {
+      const problem = await recordFieldApplication(ctx.projectId, e.capturedAt, e.payload as unknown as ApplicationPayload)
+      if (problem) rejected.push({ id: e.id, error: problem })
+    }
   }
-  return { accepted }
+  return { accepted, rejected }
 })
 
 app.get('/lots', async (req, reply) => {
@@ -535,7 +542,11 @@ app.get('/batches/:code', async (req, reply) => {
   ).rows
   const dispatches = (
     await pool.query(
-      `SELECT d.*, (SELECT json_agg(json_build_object('id', a.id, 'farmName', a.farm_name, 'appliedMassKg', a.applied_mass_kg, 'appliedAt', a.applied_at))
+      `SELECT d.*, (SELECT json_agg(json_build_object('id', a.id, 'farmName', a.farm_name, 'appliedMassKg', a.applied_mass_kg, 'appliedAt', a.applied_at,
+                      'areaHa', a.area_ha, 'gps', a.gps_lat IS NOT NULL, 'boundaryPoints', COALESCE(jsonb_array_length(a.polygon->'coordinates'->0) - 1, 0),
+                      'photos', COALESCE(jsonb_array_length(a.photo_refs), 0), 'video', a.video_ref IS NOT NULL,
+                      'signedBy', a.declaration->>'name', 'photoRefs', a.photo_refs, 'videoRef', a.video_ref,
+                      'signatureRef', a.declaration->>'signatureRef'))
                     FROM applications a WHERE a.dispatch_id = d.id) AS applications
        FROM dispatches d WHERE d.batch_id = $1 ORDER BY d.dispatched_at DESC`,
       [b.id]
