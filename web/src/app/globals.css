@@ -268,6 +268,12 @@ body {
   font-size: var(--t-head);
   font-weight: var(--w-regular);
   margin: 0;
+  white-space: nowrap;
+}
+.field-status {
+  font-size: var(--t-caption);
+  text-align: right;
+  min-width: 0;
 }
 .field-form {
   display: grid;

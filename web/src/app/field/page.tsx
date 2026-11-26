@@ -231,9 +231,9 @@ export default function FieldApp() {
           <Logo size={24} title="CarbonMarketsHQ" />
           <h1>Field capture</h1>
         </div>
-        <span className="mono muted" style={{ fontSize: 'var(--t-caption)' }}>
+        <span className="mono muted field-status" data-testid="field-status">
           {!online
-            ? 'Offline, capturing locally'
+            ? 'Offline, saving here'
             : outbox.length > 0
               ? `${outbox.length} to sync`
               : 'All records synced'}

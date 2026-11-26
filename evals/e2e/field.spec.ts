@@ -17,6 +17,11 @@ test('W1 capture offline with a photo, survive reload, sync when back online', a
   await page.waitForSelector('[data-offline-ready="true"]', { timeout: 20_000 })
 
   await context.setOffline(true)
+  // At phone width the offline status must not push the title onto two lines.
+  await page.setViewportSize({ width: 393, height: 852 })
+  await expect(page.getByTestId('field-status')).toHaveText('Offline, saving here')
+  const title = await page.locator('.field-head h1').boundingBox()
+  expect(title!.height).toBeLessThan(40)
 
   await page.getByTestId('field-supplier').selectOption({ label: SEED.suppliers[0] })
   await page.getByTestId('field-mass').fill('412')
