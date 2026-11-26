@@ -35,6 +35,7 @@ import { registerBalanceRoutes } from './balance.js'
 import { registerTrendRoutes } from './trends.js'
 import { registerReportRoutes } from './reports.js'
 import { recordFieldApplication, registerApplicationRoutes, type ApplicationPayload } from './applications.js'
+import { SINKS, registerSinkRoutes } from './sinks.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -105,6 +106,7 @@ registerBalanceRoutes(app)
 registerTrendRoutes(app)
 registerReportRoutes(app)
 registerApplicationRoutes(app)
+registerSinkRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 
@@ -795,15 +797,19 @@ app.post('/applications', async (req, reply) => {
     areaHa?: number
     appliedMassKg?: number
     sourceId?: string
+    sink?: string
   }
   if (!b.dispatchId || !b.farmName || typeof b.areaHa !== 'number' || typeof b.appliedMassKg !== 'number') {
     return reply.code(400).send({ error: 'dispatchId, farmName, areaHa and appliedMassKg are required' })
   }
+  if (b.sink && !SINKS[b.sink]) {
+    return reply.code(400).send({ error: `sink must be one of ${Object.keys(SINKS).join(', ')}` })
+  }
   const id = newId('app')
   await pool.query(
-    `INSERT INTO applications (id, project_id, dispatch_id, farm_name, area_ha, applied_mass_kg, applied_at, source_id)
-     VALUES ($1, $2, $3, $4, $5, $6, now(), $7)`,
-    [id, ctx.projectId, b.dispatchId, b.farmName, b.areaHa, b.appliedMassKg, b.sourceId ?? null]
+    `INSERT INTO applications (id, project_id, dispatch_id, farm_name, area_ha, applied_mass_kg, applied_at, source_id, sink)
+     VALUES ($1, $2, $3, $4, $5, $6, now(), $7, $8)`,
+    [id, ctx.projectId, b.dispatchId, b.farmName, b.areaHa, b.appliedMassKg, b.sourceId ?? null, b.sink ?? 'soil']
   )
   return { id }
 })

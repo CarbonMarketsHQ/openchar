@@ -310,6 +310,20 @@ export async function buildCompliance(projectId: string): Promise<{
     state: Number(appTotals.dispatched) > 0 && Number(appTotals.applied) >= Number(appTotals.dispatched) * 0.8 ? 'pass' : 'warn',
     detail: `${Math.round(Number(appTotals.dispatched))} kg dispatched, ${Math.round(Number(appTotals.applied))} kg with application evidence. Credits issue only at soil application, so every dispatch needs its application record.`,
   })
+  const otherSinks = (
+    await pool.query(
+      `SELECT sink, SUM(applied_mass_kg) AS kg FROM applications WHERE project_id = $1 AND sink <> 'soil' GROUP BY sink ORDER BY sink`,
+      [projectId]
+    )
+  ).rows
+  if (otherSinks.length) {
+    site.push({
+      id: 'SITE-SINKS',
+      title: 'Sinks the ledger credits',
+      state: 'warn',
+      detail: `${otherSinks.map((s) => `${Math.round(Number(s.kg))} kg to ${s.sink}`).join(', ')}. This ledger credits soil storage only, so these are recorded and not credited.`,
+    })
+  }
   const activationMass = (
     await pool.query(
       `SELECT COALESCE(SUM(c.mass_kg), 0) AS m FROM co_products c JOIN batches b ON b.id = c.batch_id

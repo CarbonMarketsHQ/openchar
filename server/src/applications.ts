@@ -7,6 +7,7 @@
 import type { FastifyInstance } from 'fastify'
 import { requireProject } from './auth.js'
 import { pool } from './db.js'
+import { SINKS } from './sinks.js'
 
 type Point = [number, number]
 
@@ -36,6 +37,7 @@ export type ApplicationPayload = {
   photoRefs?: string[]
   videoRef?: string | null
   declaration?: { name: string; statement: string; signedAt: string; signatureRef: string | null } | null
+  sink?: string
 }
 
 /** Called from /sync for each `application-captured` event. Returns an error
@@ -54,8 +56,8 @@ export async function recordFieldApplication(projectId: string, capturedAt: stri
     : null
   await pool.query(
     `INSERT INTO applications (id, project_id, dispatch_id, farm_name, area_ha, polygon, applied_mass_kg, applied_at,
-                               gps_lat, gps_lng, photo_refs, video_ref, declaration)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) ON CONFLICT (id) DO NOTHING`,
+                               gps_lat, gps_lng, photo_refs, video_ref, declaration, sink)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) ON CONFLICT (id) DO NOTHING`,
     [
       p.applicationId,
       projectId,
@@ -70,6 +72,7 @@ export async function recordFieldApplication(projectId: string, capturedAt: stri
       JSON.stringify(p.photoRefs ?? []),
       p.videoRef ?? null,
       p.declaration ? JSON.stringify(p.declaration) : null,
+      p.sink && SINKS[p.sink] ? p.sink : 'soil',
     ]
   )
   return null

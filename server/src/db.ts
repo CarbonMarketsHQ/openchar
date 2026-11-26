@@ -256,6 +256,7 @@ export async function migrate(): Promise<void> {
   await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS photo_refs jsonb`)
   await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS video_ref text`)
   await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS declaration jsonb`)
+  await pool.query(`ALTER TABLE applications ADD COLUMN IF NOT EXISTS sink text NOT NULL DEFAULT 'soil'`)
 }
 
 /** Canonical JSON: keys sorted recursively, so a jsonb round-trip through
