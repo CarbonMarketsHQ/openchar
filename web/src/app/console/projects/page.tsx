@@ -1,4 +1,4 @@
-import { Badge, Card, CardBody, CardHead, CardTitle, KeyValues } from '@/design'
+import { Badge, Card, CardBody, CardFoot, CardHead, CardTitle, KeyValues } from '@/design'
 import { api, type Project } from '@/lib/api'
 import { ApiDown } from '../bits'
 import { EditGridFactor, NewProject } from './new-project'
@@ -39,15 +39,27 @@ export default async function Projects() {
                       label: 'Data',
                       value: p.synthetic ? <Badge tone="caution">Synthetic</Badge> : <Badge tone="positive">Production</Badge>,
                     },
+                    {
+                      label: 'Public page',
+                      value: p.public ? (
+                        <a href={`/public/${p.id}`} target="_blank" rel="noreferrer" data-testid="public-link">
+                          Published
+                        </a>
+                      ) : (
+                        'Private'
+                      ),
+                    },
                   ]}
                 />
+              </CardBody>
+              <CardFoot>
                 <PublicToggle projectId={p.id} isPublic={p.public} />
                 <EditGridFactor
                   projectId={p.id}
                   kgPerKwh={p.gridEfTPerKwh === null ? null : Number((p.gridEfTPerKwh * 1000).toFixed(4))}
                   source={p.gridEfSource}
                 />
-              </CardBody>
+              </CardFoot>
             </Card>
           ))}
         </div>

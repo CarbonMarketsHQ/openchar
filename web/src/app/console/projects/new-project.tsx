@@ -85,7 +85,7 @@ export function EditGridFactor({ projectId, kgPerKwh, source }: { projectId: str
   return (
     <FormDialog
       trigger={kgPerKwh === null ? 'Set grid factor' : 'Edit grid factor'}
-      triggerVariant="ghost"
+      triggerVariant="outline"
       triggerTestId="edit-grid-ef"
       title="Grid electricity emission factor"
       description="Used to turn the plant's electricity use into emissions in every batch's calculation."

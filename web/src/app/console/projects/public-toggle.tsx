@@ -13,16 +13,9 @@ export function PublicToggle({ projectId, isPublic }: { projectId: string; isPub
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   return (
-    <div className="public-toggle">
-      {isPublic ? (
-        <a href={`/public/${projectId}`} target="_blank" rel="noreferrer" data-testid="public-link">
-          Public page is on
-        </a>
-      ) : (
-        <span className="muted">Public page is off</span>
-      )}
+    <>
       <Button
-        variant="ghost"
+        variant="outline"
         disabled={busy}
         data-testid="public-toggle"
         onClick={async () => {
@@ -34,9 +27,9 @@ export function PublicToggle({ projectId, isPublic }: { projectId: string; isPub
           router.refresh()
         }}
       >
-        {isPublic ? 'Unpublish' : 'Publish'}
+        {isPublic ? 'Unpublish page' : 'Publish page'}
       </Button>
-      {error && <span style={{ color: "var(--negative-ink)" }}>{error}</span>}
-    </div>
+      {error && <span style={{ color: 'var(--negative-ink)', fontSize: 'var(--t-ui-sm)' }}>{error}</span>}
+    </>
   )
 }
