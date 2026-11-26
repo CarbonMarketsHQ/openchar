@@ -246,6 +246,9 @@ export async function migrate(): Promise<void> {
   await pool.query(`ALTER TABLE dispatches ADD COLUMN IF NOT EXISTS dest_lng numeric`)
   await pool.query(`ALTER TABLE batch_ops ADD COLUMN IF NOT EXISTS collection_tkm numeric`)
   await pool.query(`ALTER TABLE batch_ops ADD COLUMN IF NOT EXISTS fuel_tco2e numeric`)
+  await pool.query(`ALTER TABLE batches ADD COLUMN IF NOT EXISTS feedstock_c_frac numeric`)
+  await pool.query(`ALTER TABLE batches ADD COLUMN IF NOT EXISTS feedstock_c_source text`)
+  await pool.query(`ALTER TABLE batches ADD COLUMN IF NOT EXISTS gas_mass_kg numeric`)
 }
 
 /** Canonical JSON: keys sorted recursively, so a jsonb round-trip through
