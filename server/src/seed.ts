@@ -166,6 +166,28 @@ async function seed() {
     [DEMO.projectId, DEMO.facilityId, at(24, 490), at(24, 530), at(12, 185), at(12, 280), at(120, 60), at(120, 300)]
   )
 
+  // The calibration register: one scale due within the month, the moisture meter lapsed.
+  const day = (daysAgo: number) => new Date(Date.now() - daysAgo * DAY).toISOString().slice(0, 10)
+  const due = (daysAgo: number, interval: number) => day(daysAgo - interval)
+  await pool.query(
+    `INSERT INTO instruments (id, project_id, facility_id, name, kind, serial, interval_days) VALUES
+     ('ins-hopper', $1, $2, 'Loading hopper scale', 'scale', 'HS-2291', 180),
+     ('ins-silo', $1, $2, 'Biochar silo scale', 'scale', 'SS-0457', 180),
+     ('ins-t1', $1, $2, 'Reactor thermocouple T1', 'thermocouple', 'TC-K-118', 365),
+     ('ins-t2', $1, $2, 'Reactor thermocouple T2', 'thermocouple', 'TC-K-207', 365),
+     ('ins-moist', $1, $2, 'Feedstock moisture meter', 'moisture-meter', 'MM-3310', 90)`,
+    [DEMO.projectId, DEMO.facilityId]
+  )
+  await pool.query(
+    `INSERT INTO calibrations (id, instrument_id, calibrated_on, next_due, performed_by, result, source_id, note) VALUES
+     ('cal-demo-1', 'ins-hopper', $1, $2, 'Weights and Measures office, Nakuru (demo)', 'pass', 'src-hopper-cal', NULL),
+     ('cal-demo-2', 'ins-silo', $3, $4, 'Weights and Measures office, Nakuru (demo)', 'pass', 'src-hopper-cal', NULL),
+     ('cal-demo-3', 'ins-t1', $5, $6, 'Plant maintenance team', 'pass', NULL, 'Checked against a reference probe at 500 °C'),
+     ('cal-demo-4', 'ins-t2', $7, $8, 'Plant maintenance team', 'pass', NULL, 'New sensor fitted during planned maintenance'),
+     ('cal-demo-5', 'ins-moist', $9, $10, 'Supplier service centre (demo)', 'pass', NULL, NULL)`,
+    [day(160), due(160, 180), day(40), due(40, 180), day(200), due(200, 365), day(5), due(5, 365), day(100), due(100, 90)]
+  )
+
   await pool.query(`UPDATE lots SET batch_id = 'bat-ht02' WHERE id IN ('L-01', 'L-02')`)
   await pool.query(`UPDATE lots SET batch_id = 'bat-ht03' WHERE id = 'L-03'`)
 
