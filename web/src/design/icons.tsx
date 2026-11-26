@@ -251,6 +251,13 @@ export const IconLog = (p: IconProps) => (
   </Icon>
 )
 
+export const IconBalance = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M8 2.5v11M5 13.5h6M3.5 4.5h9" />
+    <path d="M3.5 4.5 1.5 9.5h4zM12.5 4.5l-2 5h4z" />
+  </Icon>
+)
+
 export const IconClock = (p: IconProps) => (
   <Icon {...p}>
     <circle cx="8" cy="8" r="5.5" />

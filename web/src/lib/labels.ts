@@ -71,3 +71,39 @@ export function fmtDuration(min: number): string {
   if (h === 0) return `${m} min`
   return m === 0 ? `${h} h` : `${h} h ${m} min`
 }
+
+export const INSTRUMENT_KINDS: { value: string; label: string }[] = [
+  { value: 'scale', label: 'Scale' },
+  { value: 'thermocouple', label: 'Thermocouple' },
+  { value: 'moisture-meter', label: 'Moisture meter' },
+  { value: 'flow-meter', label: 'Flow meter' },
+  { value: 'energy-meter', label: 'Energy meter' },
+  { value: 'gas-analyser', label: 'Gas analyser' },
+  { value: 'other', label: 'Other' },
+]
+
+export function instrumentKindLabel(value: string): string {
+  return INSTRUMENT_KINDS.find((k) => k.value === value)?.label ?? statusLabel(value)
+}
+
+export const CALIBRATION_STATE: Record<string, { label: string; tone: 'positive' | 'caution' | 'negative' }> = {
+  current: { label: 'In calibration', tone: 'positive' },
+  'due-soon': { label: 'Due soon', tone: 'caution' },
+  overdue: { label: 'Lapsed', tone: 'negative' },
+  never: { label: 'Never calibrated', tone: 'caution' },
+  failed: { label: 'Failed', tone: 'negative' },
+}
+
+export const CALIBRATION_RESULTS: { value: string; label: string }[] = [
+  { value: 'pass', label: 'Pass, no adjustment' },
+  { value: 'adjusted', label: 'Pass after adjustment' },
+  { value: 'fail', label: 'Fail, take out of use' },
+]
+
+/** "in 20 days", "today", "10 days ago". */
+export function relativeDays(days: number): string {
+  if (days === 0) return 'today'
+  if (days === 1) return 'tomorrow'
+  if (days === -1) return 'yesterday'
+  return days > 0 ? `in ${days} days` : `${-days} days ago`
+}
