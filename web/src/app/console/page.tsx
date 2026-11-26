@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { Badge, Card, CardBody, CardHead, CardTitle } from '@/design'
+import { Badge, Card, CardBody, CardHead, CardTitle, Notice } from '@/design'
 import { api, type BatchRow, type Summary } from '@/lib/api'
-import { statusLabel } from '@/lib/labels'
+import { relativeDays, statusLabel } from '@/lib/labels'
+import type { Instrument } from './calibration/page'
 import { DataFallback, Stat, fmtDate, fmtKg } from './bits'
 
 const STATUS_TONE = {
@@ -11,10 +12,15 @@ const STATUS_TONE = {
 } as const
 
 export default async function Overview() {
-  const [summary, batches] = await Promise.all([
+  const [summary, batches, register] = await Promise.all([
     api<Summary>('/summary'),
     api<BatchRow[]>('/batches'),
+    api<{ instruments: Instrument[] }>('/instruments'),
   ])
+  const attention = (register?.instruments ?? [])
+    .filter((i) => ['overdue', 'failed', 'never', 'due-soon'].includes(i.state))
+    .sort((a, b) => (a.daysToDue ?? -1e9) - (b.daysToDue ?? -1e9))
+  const lapsed = attention.some((i) => i.state !== 'due-soon')
   if (!summary || !batches) return <DataFallback />
 
   return (
@@ -26,6 +32,23 @@ export default async function Overview() {
           a lab certificate.
         </p>
       </div>
+
+      {attention.length > 0 && (
+        <div data-testid="calibration-notice">
+          <Notice tone={lapsed ? 'negative' : 'caution'} title={lapsed ? 'Calibration lapsed' : 'Calibration due soon'}>
+            {attention
+              .map((i) =>
+                i.state === 'never'
+                  ? `${i.name} has never been calibrated`
+                  : i.state === 'failed'
+                    ? `${i.name} failed its last calibration`
+                    : `${i.name} ${i.state === 'overdue' ? 'lapsed' : 'is due'} ${relativeDays(i.daysToDue ?? 0)}`
+              )
+              .join('. ')}
+            . <Link href="/console/calibration">Open the calibration register</Link>
+          </Notice>
+        </div>
+      )}
 
       <div className="stat-grid">
         <Stat
