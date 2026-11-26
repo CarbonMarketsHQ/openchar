@@ -11,7 +11,6 @@ works.
 
 ## Production and accounting
 
-- Batch and monthly reports as PDF and Excel.
 
 ## End use and carbon sinks
 

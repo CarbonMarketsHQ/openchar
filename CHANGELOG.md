@@ -4,6 +4,13 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Reports
+- A Reports page lists a report for each batch and one for each of the last six months.
+- Batch reports include the ledger and its evidence, production and balance checks, feedstock, lab results, co-products, units and end use, and fuel.
+- Monthly reports include intake, batches, emissions by scope, shifts, downtime, fuel, and calibrations.
+- You can open any report as a printable page to save as a PDF from the browser, or download it as an Excel workbook with one sheet per record type.
+- Tests: REP1 and REP2 in `evals/e2e/reports.spec.ts`.
+
 ### Trends
 - A new Trends page charts each batch from oldest to newest: dry biochar yield, throughput per day and per shift, residence time, electricity per dry tonne and fuel per dry tonne. Total production is shown by month.
 - All chart values come from records already in OpenChar. If a batch is missing a record needed for a value, the chart shows a gap instead of an estimate.
