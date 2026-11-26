@@ -9,3 +9,7 @@ export type NavItem = { href: string; label: string; icon: ReactNode }
 
 /** Extra entries for the console sidebar's setup group. */
 export const extraSetupNav: NavItem[] = []
+
+/** A landing page for `/`. Without one, `/` goes straight to the console.
+ * A build that sets it also sets `hasHome` in ./routes.ts. */
+export const Home: (() => ReactNode | Promise<ReactNode>) | null = null

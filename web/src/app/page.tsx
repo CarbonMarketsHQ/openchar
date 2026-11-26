@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
+import { Home } from '@/ext'
 
-export default function Root() {
+export default async function Root() {
+  if (Home) return <Home />
   redirect('/console')
 }
