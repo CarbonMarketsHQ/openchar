@@ -168,8 +168,28 @@ async function seed() {
     [DEMO.projectId, DEMO.facilityId, at(24, 490), at(24, 530), at(12, 185), at(12, 280), at(120, 60), at(120, 300)]
   )
 
+  // Fuel: start-up and loader diesel on HT-02, the generator during the outage, one delivery trip.
+  await pool.query(
+    `INSERT INTO fuel_logs (id, project_id, batch_id, logged_at, fuel, quantity, use, vehicle, trip_km, note) VALUES
+     ('ful-demo-1', $1, 'bat-ht02', $2, 'diesel', 18, 'reactor-startup', NULL, NULL, 'Burner to bring the reactor to temperature'),
+     ('ful-demo-2', $1, 'bat-ht02', $3, 'diesel', 25, 'loader', NULL, NULL, NULL),
+     ('ful-demo-3', $1, 'bat-ht03', $4, 'biomass', 35, 'reactor-startup', NULL, NULL, 'Dry maize cobs to light the reactor'),
+     ('ful-demo-4', $1, 'bat-ht01', $5, 'diesel', 40, 'generator', NULL, NULL, 'Grid outage'),
+     ('ful-demo-5', $1, NULL, $6, 'diesel', 9, 'vehicle-trip', 'Delivery truck (demo)', 58, 'Biochar to the bulk buyer')`,
+    [DEMO.projectId, iso(20, 30), iso(15), iso(10, 20), at(12, 200), iso(2)]
+  )
+  // One electricity meter, read daily at midnight UTC, rising 30 kWh a day.
+  for (let d = 30; d >= 0; d--) {
+    const t = new Date(Date.now() - d * DAY)
+    t.setUTCHours(0, 0, 0, 0)
+    await pool.query(
+      `INSERT INTO meter_readings (id, project_id, meter, read_at, kwh, source) VALUES ($1, $2, 'Main meter', $3, $4, 'api')`,
+      [`mtr-demo-${d}`, DEMO.projectId, t.toISOString(), 18250 + (30 - d) * 30]
+    )
+  }
+
   // The calibration register: one scale due within the month, the moisture meter lapsed.
-  const day = (daysAgo: number) => new Date(Date.now() - daysAgo * DAY).toISOString().slice(0, 10)
+  const day =(daysAgo: number) => new Date(Date.now() - daysAgo * DAY).toISOString().slice(0, 10)
   const due = (daysAgo: number, interval: number) => day(daysAgo - interval)
   await pool.query(
     `INSERT INTO instruments (id, project_id, facility_id, name, kind, serial, interval_days) VALUES
