@@ -9,7 +9,9 @@ import { pool, verifyChain } from './db.js'
 import {
   batchLedger,
   counterfactualCC3,
+  collectionDeduction,
   electricityDeduction,
+  fuelDeduction,
   requirementStates,
   transportDeduction,
   type BatchInput,
@@ -113,8 +115,8 @@ export async function buildLedger(projectId: string, code: string): Promise<Ledg
   const deductions = []
   if (ops) {
     const slipSources = slip ? [slip] : []
-    dp('transport-distance', 'Feedstock transport distance', Number(ops.transport_km), 'km', 0, slipSources)
-    dp('transport-mass', 'Transported mass', Number(ops.transport_mass_t), 't', 0, slipSources)
+    dp('transport-distance', 'Transport distance (run inputs)', Number(ops.transport_km), 'km', 0, slipSources)
+    dp('transport-mass', 'Transported mass (run inputs)', Number(ops.transport_mass_t), 't', 0, slipSources)
     dp('ef-transport', FACTORS.transportTPerTKm.note, FACTORS.transportTPerTKm.value, 'tCO2e/t-km', 0, [])
     dp('electricity-kwh', 'Plant electricity for the run', Number(ops.electricity_kwh), 'kWh', 0, [])
     dp('ef-grid', grid.note, grid.value, 'tCO2e/kWh', 0, [])
@@ -122,6 +124,15 @@ export async function buildLedger(projectId: string, code: string): Promise<Ledg
       transportDeduction(Number(ops.transport_km), Number(ops.transport_mass_t), FACTORS.transportTPerTKm.value),
       electricityDeduction(Number(ops.electricity_kwh), grid.value)
     )
+    // Lines that exist only once a person has applied them from the logs.
+    if (ops.collection_tkm !== null && ops.collection_tkm !== undefined) {
+      dp('collection-tkm', 'Feedstock collection, supplier to plant (consignment distances)', Number(ops.collection_tkm), 't-km', 0, [])
+      deductions.push(collectionDeduction(Number(ops.collection_tkm), FACTORS.transportTPerTKm.value))
+    }
+    if (ops.fuel_tco2e !== null && ops.fuel_tco2e !== undefined) {
+      dp('fuel-tco2e', 'Fossil fuel burned for the run (fuel log, IPCC 2006 default factors)', Number(ops.fuel_tco2e), 'tCO2e', 0, [])
+      deductions.push(fuelDeduction(Number(ops.fuel_tco2e)))
+    }
   }
   const cf = counterfactualCC3()
   dp(

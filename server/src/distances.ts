@@ -119,7 +119,7 @@ export function registerDistanceRoutes(app: FastifyInstance): void {
       massKg: Number(d.mass_kg),
       ...distanceFor(d.distance_km, plant, point(d.dest_lat, d.dest_lng)),
     }))
-    const ops = (await pool.query(`SELECT transport_km, transport_mass_t FROM batch_ops WHERE batch_id = $1`, [batch.id])).rows[0]
+    const ops = (await pool.query(`SELECT transport_km, transport_mass_t, collection_tkm FROM batch_ops WHERE batch_id = $1`, [batch.id])).rows[0]
     const known = <T extends { km: number | null }>(xs: T[]) => xs.filter((x): x is T & { km: number } => x.km !== null)
     const sum = (xs: { km: number; massKg: number }[]) => Math.round(xs.reduce((n, x) => n + (x.km * x.massKg) / 1000, 0) * 10) / 10
     return {
@@ -133,7 +133,13 @@ export function registerDistanceRoutes(app: FastifyInstance): void {
         massT: Math.round(known(disp).reduce((n, d) => n + d.massKg, 0)) / 1000,
         missing: disp.filter((d) => d.km === null).map((d) => d.id),
       },
-      ledger: ops ? { transportKm: Number(ops.transport_km), transportMassT: Number(ops.transport_mass_t) } : null,
+      ledger: ops
+        ? {
+            transportKm: Number(ops.transport_km),
+            transportMassT: Number(ops.transport_mass_t),
+            collectionTkm: ops.collection_tkm === null ? null : Number(ops.collection_tkm),
+          }
+        : null,
     }
   })
 
@@ -159,5 +165,32 @@ export function registerDistanceRoutes(app: FastifyInstance): void {
     if (!ops) return reply.code(400).send({ error: 'Enter the run inputs for this batch first.' })
     await pool.query(`UPDATE batch_ops SET transport_km = $1, transport_mass_t = $2 WHERE batch_id = $3`, [km, massT, batch.id])
     return { transportKm: km, transportMassT: massT }
+  })
+
+  /** Put the consignments' collection tonne-kilometres into the run inputs,
+   * which adds the feedstock collection line to the ledger. */
+  app.post('/batches/:code/transport/apply-collection', async (req, reply) => {
+    const ctx = await requireProject(req, reply)
+    if (!ctx) return
+    const { code } = req.params as { code: string }
+    const batch = await resolveBatch(ctx.projectId, code)
+    if (!batch) return reply.code(404).send({ error: 'batch not found' })
+    const plant = await plantPoint(ctx.projectId, batch.facility_id)
+    const cons = (
+      await pool.query(
+        `SELECT c.est_mass_kg, c.distance_km, s.lat, s.lng FROM consignments c
+         JOIN lots l ON l.id = c.lot_id JOIN suppliers s ON s.id = c.supplier_id WHERE l.batch_id = $1`,
+        [batch.id]
+      )
+    ).rows.map((c) => ({ massKg: Number(c.est_mass_kg), ...distanceFor(c.distance_km, point(c.lat, c.lng), plant) }))
+    if (!cons.length || cons.some((c) => c.km === null)) {
+      return reply.code(400).send({ error: 'Every consignment in the batch needs a distance first.' })
+    }
+    if (!(await pool.query(`SELECT 1 FROM batch_ops WHERE batch_id = $1`, [batch.id])).rows.length) {
+      return reply.code(400).send({ error: 'Enter the run inputs for this batch first.' })
+    }
+    const tkm = Math.round(cons.reduce((n, c) => n + (c.km! * c.massKg) / 1000, 0) * 10) / 10
+    await pool.query(`UPDATE batch_ops SET collection_tkm = $1 WHERE batch_id = $2`, [tkm, batch.id])
+    return { collectionTkm: tkm }
   })
 }
