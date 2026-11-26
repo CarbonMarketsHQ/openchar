@@ -17,7 +17,8 @@ test('DOC1 upload a supplier declaration to a consignment from the console, then
   // The seeded slip and certificate are listed with the records they already support.
   const slip = page.getByTestId('doc-row').filter({ hasText: 'Weighbridge slip 4411 (demo)' })
   await expect(slip.getByTestId('doc-type-badge')).toHaveText('Weighbridge slip')
-  await expect(slip.getByTestId('doc-link')).toHaveCount(3)
+  await expect(slip.getByTestId('doc-link')).toHaveCount(1)
+  await expect(slip.getByTestId('doc-link')).toContainText('L-01')
   const cert = page.getByTestId('doc-row').filter({ hasText: 'Trial batch HT-02 lab certificate (demo)' })
   await expect(cert.getByTestId('doc-link').first()).toContainText(SEED.batches.sampled)
 

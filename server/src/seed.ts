@@ -70,6 +70,8 @@ async function seed() {
   await pool.query(
     `INSERT INTO sources (id, project_id, kind, title, ref, note) VALUES
      ('src-slip-001', $1, 'weighbridge-slip', 'Weighbridge slip 4411 (demo)', 'slips/4411.jpg', 'Nearby legal-for-trade weighbridge, slip photographed at the gate'),
+     ('src-slip-002', $1, 'weighbridge-slip', 'Weighbridge slip 4418 (demo)', 'slips/4418.jpg', 'Nearby legal-for-trade weighbridge, slip photographed at the gate'),
+     ('src-slip-003', $1, 'weighbridge-slip', 'Weighbridge slip 4426 (demo)', 'slips/4426.jpg', 'Nearby legal-for-trade weighbridge, slip photographed at the gate'),
      ('src-hopper-cal', $1, 'calibration', 'Hopper and silo scale calibration record (demo)', 'cal/scales-2026.pdf', 'Calibration certificates for the loading hopper and biochar silo scales'),
      ('src-cert-ht02', $1, 'lab-certificate', 'Trial batch HT-02 lab certificate (demo)', 'lab/HT-02.pdf', 'Ultimate analysis: Corg, H/Corg, O/Corg, moisture'),
      ('src-decay-photos', $1, 'counterfactual', 'Residue heaps photo series, supplier yards (demo)', 'photos/decay-set-1/', 'Maize cobs with no commercial use, left to decay. The basis of the CC3 argument'),
@@ -121,8 +123,8 @@ async function seed() {
   await pool.query(
     `INSERT INTO lots (id, project_id, hopper_mass_kg, weighbridge_slip_kg, moisture_frac, slip_source_id) VALUES
      ('L-01', $1, 800, 792, 0.23, 'src-slip-001'),
-     ('L-02', $1, 835, 828, 0.23, 'src-slip-001'),
-     ('L-03', $1, 405, 401, 0.23, 'src-slip-001')`,
+     ('L-02', $1, 835, 828, 0.23, 'src-slip-002'),
+     ('L-03', $1, 405, 401, 0.23, 'src-slip-003')`,
     [DEMO.projectId]
   )
   for (const c of consignmentSeeds) {
