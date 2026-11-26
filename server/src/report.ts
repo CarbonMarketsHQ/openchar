@@ -4,6 +4,7 @@
  * data-driven: no client-specific text lives in code.
  */
 import { instrumentsFor } from './calibration.js'
+import { findDuplicates } from './duplicates.js'
 import { pool, verifyChain } from './db.js'
 import {
   batchLedger,
@@ -313,6 +314,15 @@ export async function buildCompliance(projectId: string): Promise<{
       detail: `${Math.round(Number(activationMass.m))} kg went to the activation line. It is not stored, so it earns no removal credits and is taken out of every GHG statement's mass balance.`,
     })
   }
+  const dupes = await findDuplicates(projectId)
+  site.push({
+    id: 'SITE-DUPLICATES',
+    title: 'No duplicate records',
+    state: dupes.length ? 'warn' : 'pass',
+    detail: dupes.length
+      ? `${dupes.length} possible ${dupes.length === 1 ? 'duplicate' : 'duplicates'} to review: ${dupes.map((d) => d.ids.join(' and ')).join('; ')}.`
+      : 'No consignment, slip or file appears twice.',
+  })
   const undeclared = batches.filter((b) => b.closed_at && b.co_product_count === 0)
   site.push({
     id: 'R-3MBJ-0',
