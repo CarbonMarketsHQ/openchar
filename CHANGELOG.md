@@ -4,6 +4,13 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Shift log
+- A Shift log page records who ran the reactor, when each shift started and ended, and what happened during it.
+- Each shift ends with a handover note, and the latest note is shown at the top for the next operator.
+- Downtime can be logged by cause (planned maintenance, breakdown, feedstock shortage, power outage, weather, quality hold or other). The page totals monthly downtime by cause. When downtime crosses into a new month, each month counts only its own minutes.
+- Batches are matched to shifts by time, and each batch page lists the operators who ran it.
+- Tests: SL1, SL2 and SL3 in `evals/e2e/shifts.spec.ts`.
+
 ### Workspace copy
 - Admins download a full copy of the workspace from the Account page: every table as JSON and CSV, and every uploaded file, in one ZIP file. Passwords and sign-in sessions are not included.
 - `npm run admin -- import-workspace` loads the copy into another OpenChar server. It checks every file against its SHA-256 hash and prints a link for each person to set a new password.

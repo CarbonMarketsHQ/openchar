@@ -8,8 +8,6 @@ works.
 
 ## Records and evidence
 
-- An operator shift log: who ran the reactor, what happened, the handover,
-  and downtime by cause and duration.
 - A calibration register for every instrument (scales, thermocouples,
   moisture meters), with due dates and an alert before a calibration lapses.
 - Detection of duplicate records, such as one slip entered twice.
