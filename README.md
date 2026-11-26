@@ -17,6 +17,12 @@ run this digital monitoring, reporting and verification (dMRV) software on
 their own server, read every line of the carbon calculation, and keep a full
 copy of their data.
 
+<p align="center">
+  <a href="https://openchar.carbonmarketshq.com/#walkthrough"><img src="docs/media/walkthrough.jpg" alt="Play the OpenChar walkthrough video" width="100%" /></a>
+  <br />
+  <sub>Watch the 2.5-minute narrated walkthrough, from a consignment recorded offline on a phone to a registry submission.</sub>
+</p>
+
 <table>
   <tr>
     <td width="50%"><img src="docs/media/panel-field.jpg" alt="The field app on two phones: a consignment being captured with a GPS fix and a stamped photo, and three captures waiting to sync" /></td>
