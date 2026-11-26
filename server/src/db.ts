@@ -207,6 +207,13 @@ export async function migrate(): Promise<void> {
       sent_at timestamptz NOT NULL DEFAULT now(),
       PRIMARY KEY (instrument_id, due_on, kind)
     );
+    -- A person's decision that flagged records are not duplicates.
+    CREATE TABLE IF NOT EXISTS duplicate_reviews (
+      id serial PRIMARY KEY, project_id text NOT NULL REFERENCES projects(id),
+      kind text NOT NULL, ids text[] NOT NULL,
+      decided_by text, note text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
     -- Written by deploy/backup/backup.sh after each good run; platform-wide,
     -- so seeding never truncates it.
     CREATE TABLE IF NOT EXISTS backup_runs (

@@ -27,6 +27,7 @@ import { allLinks, registerDocumentRoutes } from './documents.js'
 import { registerExportRoutes } from './export.js'
 import { registerShiftRoutes } from './shifts.js'
 import { registerCalibrationRoutes, sendCalibrationAlerts } from './calibration.js'
+import { registerDuplicateRoutes } from './duplicates.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -89,6 +90,7 @@ registerDocumentRoutes(app)
 registerExportRoutes(app)
 registerShiftRoutes(app)
 registerCalibrationRoutes(app)
+registerDuplicateRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 
@@ -415,6 +417,10 @@ app.post('/lots', async (req, reply) => {
     ])
   ).rows[0]
   if (!consignment) return reply.code(404).send({ error: 'consignment not found or already attached' })
+  if (body.slipSourceId) {
+    const slip = await pool.query(`SELECT 1 FROM sources WHERE id = $1 AND project_id = $2`, [body.slipSourceId, ctx.projectId])
+    if (!slip.rows.length) return reply.code(404).send({ error: 'that slip is not in this project' })
+  }
   const count = (
     await pool.query(`SELECT count(*)::int AS n FROM lots WHERE project_id = $1`, [ctx.projectId])
   ).rows[0].n
