@@ -1,3 +1,4 @@
+import type React from 'react'
 import Link from 'next/link'
 import { Notice } from '@/design'
 import { api, type Me } from '@/lib/api'
@@ -50,7 +51,7 @@ export function Stat({
   value: string
   dataValue?: number
   unit?: string
-  detail?: string
+  detail?: React.ReactNode
   testId?: string
 }) {
   return (
@@ -67,9 +68,9 @@ export function Stat({
 
 export function fmtDate(d: string | Date | null): string {
   if (!d) return 'open'
-  return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
 }
 
 export function fmtKg(n: number | null): string {
-  return n === null ? '–' : `${Math.round(n).toLocaleString('en-IN')} kg`
+  return n === null ? '–' : `${Math.round(n).toLocaleString('en-GB')} kg`
 }

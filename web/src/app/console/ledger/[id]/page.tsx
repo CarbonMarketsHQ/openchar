@@ -67,7 +67,7 @@ export default async function LedgerPage({ params }: { params: Promise<{ id: str
           value={r.netConservativeT.toFixed(3)}
           dataValue={r.netConservativeT}
           unit="t CO2e"
-          detail={`Conservative; the mean is ${r.netMeanT.toFixed(3)} t`}
+          detail={`Conservative estimate. The mean is ${r.netMeanT.toFixed(3)} t`}
           testId="ledger-net-conservative"
         />
       </div>
@@ -83,7 +83,7 @@ export default async function LedgerPage({ params }: { params: Promise<{ id: str
         </Card>
         <Card>
           <CardHead>
-            <CardTitle desc="Warm soils punish hydrogen-rich char; a lower H/Corg is worth real tonnes.">
+            <CardTitle desc="Warm soils punish hydrogen-rich char. A lower H/Corg is worth real tonnes.">
               What H/Corg is worth here
             </CardTitle>
           </CardHead>

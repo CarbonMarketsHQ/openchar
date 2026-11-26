@@ -68,21 +68,31 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
       </div>
 
       <div className="stat-grid">
-        <Stat label="Feedstock in" value={fmtKg(batch.feedstockMassKg)} detail="Hopper scale, lot-linked" />
-        <Stat label="Biochar out" value={fmtKg(batch.biocharWetKg)} detail="Silo scale, wet basis" />
+        <Stat
+          label="Feedstock in"
+          value={batch.feedstockMassKg === null ? 'Not recorded' : Math.round(batch.feedstockMassKg).toLocaleString('en-GB')}
+          unit={batch.feedstockMassKg === null ? undefined : 'kg'}
+          detail="Hopper scale, lot-linked"
+        />
+        <Stat
+          label="Biochar out"
+          value={batch.biocharWetKg === null ? 'Not recorded' : Math.round(batch.biocharWetKg).toLocaleString('en-GB')}
+          unit={batch.biocharWetKg === null ? undefined : 'kg'}
+          detail="Silo scale, wet basis"
+        />
         <Stat label="Yield" value={yieldPct ? `${yieldPct}%` : '–'} detail="Wet biochar over feedstock" />
         <Stat
           label="Batch window"
           value={`${batch.ageDays}`}
           unit="days"
-          detail="Limit one month per protocol R-6YSW-0"
+          detail={<>At most one month <span className="req-id">(R-6YSW-0)</span></>}
           testId="batch-age"
         />
       </div>
 
       <Card>
         <CardHead>
-          <CardTitle desc="PLC export, one-minute aggregation; the flagged window is anything that fell below 400°C during the hold.">
+          <CardTitle desc="One-minute readings from the reactor. Anything below 400°C during the hold is flagged.">
             Reactor temperature
           </CardTitle>
         </CardHead>
@@ -112,7 +122,7 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
                 <Notice key={a.fromMinute} tone="caution" title="Flagged automatically (R-8W08-0)">
                   <span data-testid="anomaly-list-item">
                     Temperature drop: {a.kind}, minutes {a.fromMinute} to {a.toMinute}, floor{' '}
-                    {a.minTempC.toFixed(0)}°C. Keep the batch, note the cause in the run log; consistency
+                    {a.minTempC.toFixed(0)}°C. Keep the batch and note the cause in the run log. Consistency
                     is what unlocks Method B sampling.
                   </span>
                 </Notice>
@@ -144,7 +154,7 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
         </Card>
         <Card>
           <CardHead>
-            <CardTitle desc="Declared with their fate; activation-line mass earns no credits.">Co-products</CardTitle>
+            <CardTitle desc="Declared with their fate. Mass sent to the activation line earns no credits.">Co-products</CardTitle>
           </CardHead>
           <CardBody>
             {batch.coProducts.length === 0 ? (

@@ -7,7 +7,7 @@ type Anomaly = { kind: string; fromMinute: number; toMinute: number; minTempC: n
 
 const W = 720
 const H = 240
-const M = { top: 18, right: 14, bottom: 26, left: 44 }
+const M = { top: 18, right: 14, bottom: 26, left: 66 }
 
 /**
  * Reactor temperature over a run. Single series: the title names it, so no
@@ -50,9 +50,11 @@ export function TempChart({ points, anomalies }: { points: Point[]; anomalies: A
         {ticks.map((t) => (
           <g key={t}>
             <line className="grid" x1={M.left} x2={W - M.right} y1={y(t)} y2={y(t)} />
-            <text x={M.left - 8} y={y(t) + 4} textAnchor="end">
-              {t}
-            </text>
+            {t > 0 && (
+              <text x={M.left - 8} y={y(t) + 4} textAnchor="end">
+                {t === ticks[ticks.length - 1] ? `${t} °C` : t}
+              </text>
+            )}
           </g>
         ))}
         {anomalies.map((a) => (
@@ -76,7 +78,7 @@ export function TempChart({ points, anomalies }: { points: Point[]; anomalies: A
         <line className="axis" x1={M.left} x2={W - M.right} y1={H - M.bottom} y2={H - M.bottom} />
         {[0, 60, 120, maxMinute].filter((v, i, arr) => arr.indexOf(v) === i && v <= maxMinute).map((t) => (
           <text key={t} x={x(t)} y={H - 8} textAnchor="middle">
-            {t}m
+            {t} min
           </text>
         ))}
         {hover && (
