@@ -50,6 +50,8 @@ export const EXPORT_TABLES: { name: string; where: string; columns?: string; ser
   { name: 'unit_events', where: `unit_id IN ${U}`, serial: true },
   { name: 'certify_submissions', where: `project_id IN ${P}`, serial: true },
   { name: 'source_links', where: `project_id IN ${P}` },
+  { name: 'shifts', where: `project_id IN ${P}` },
+  { name: 'downtime', where: `project_id IN ${P}` },
 ]
 
 /** Tables that are deliberately not part of a workspace copy. */

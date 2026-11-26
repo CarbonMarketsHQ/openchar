@@ -168,6 +168,24 @@ export async function migrate(): Promise<void> {
       PRIMARY KEY (source_id, record_kind, record_id)
     );
     CREATE INDEX IF NOT EXISTS source_links_record ON source_links (project_id, record_kind, record_id);
+    -- The operator shift log and downtime by cause.
+    CREATE TABLE IF NOT EXISTS shifts (
+      id text PRIMARY KEY, project_id text NOT NULL REFERENCES projects(id),
+      facility_id text REFERENCES facilities(id),
+      operator text NOT NULL,
+      started_at timestamptz NOT NULL, ended_at timestamptz,
+      notes text, handover text, created_by text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS shifts_project_started ON shifts (project_id, started_at DESC);
+    CREATE TABLE IF NOT EXISTS downtime (
+      id text PRIMARY KEY, project_id text NOT NULL REFERENCES projects(id),
+      facility_id text REFERENCES facilities(id),
+      cause text NOT NULL,
+      started_at timestamptz NOT NULL, ended_at timestamptz,
+      note text, created_by text,
+      created_at timestamptz NOT NULL DEFAULT now()
+    );
     -- Written by deploy/backup/backup.sh after each good run; platform-wide,
     -- so seeding never truncates it.
     CREATE TABLE IF NOT EXISTS backup_runs (

@@ -25,6 +25,7 @@ import { aggregateSensorSeries, certifyConfig, certifySubmit } from './certify.j
 import { registerUnitRoutes } from './units.js'
 import { allLinks, registerDocumentRoutes } from './documents.js'
 import { registerExportRoutes } from './export.js'
+import { registerShiftRoutes } from './shifts.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -85,6 +86,7 @@ registerAuthRoutes(app)
 registerUnitRoutes(app)
 registerDocumentRoutes(app)
 registerExportRoutes(app)
+registerShiftRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 
