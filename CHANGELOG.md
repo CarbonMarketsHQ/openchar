@@ -4,6 +4,12 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Mass and carbon balance
+- Each batch page compares feedstock against measured outputs: biochar sent to the silo, biochar sent to other lines, and bio-liquids. Gas and water vapour make up the remainder unless gas is weighed.
+- Checks flag measured outputs heavier than the feedstock and dry biochar yields below 15% or above 45%. When gas is weighed, checks also flag more than a 5% difference between feedstock and measured outputs.
+- When feedstock carbon content and its source are recorded, the batch page shows how much of that carbon remains in the biochar. A carbon yield above 100% fails the check, and a yield below 25% or above 75% is flagged for review.
+- Tests: BAL1 and BAL2 in `evals/e2e/balance.spec.ts`.
+
 ### Emissions by scope
 - An Emissions page splits the plant's emissions by scope. Scope 1 is fossil fuel from the fuel log. Scope 2 is metered grid electricity multiplied by the project's grid factor. Scope 3 is road transport for feedstock collection and biochar delivery.
 - It shows monthly totals over 3, 6, or 12 months, totals by source, and batch totals with emissions per dry tonne of biochar.
