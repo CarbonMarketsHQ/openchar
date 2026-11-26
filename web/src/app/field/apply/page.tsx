@@ -7,6 +7,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { Badge, Button, IconCamera, IconPin, Logo } from '@/design'
+import { SINK_TYPES } from '@/lib/labels'
 import { deleteMedia, getMedia, putMedia } from '../media'
 import { ModeSwitch } from '../mode-switch'
 
@@ -28,6 +29,7 @@ type Record_ = {
     gps: { lat: number; lng: number } | null
     boundary: Point[] | null
     declaration: { name: string; statement: string; signedAt: string } | null
+    sink: string
   }
 }
 
@@ -243,6 +245,7 @@ export default function ApplyApp() {
         gps,
         boundary: points.length >= 3 ? points : null,
         declaration: { name: declarant, statement: STATEMENT, signedAt: new Date().toISOString() },
+        sink: String(f.get('sink') || 'soil'),
       },
     }
     const next = [record, ...outbox]
@@ -344,6 +347,18 @@ export default function ApplyApp() {
               {dispatches.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.batch} to {d.toName}, {Math.round(d.leftKg)} kg left
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="field-group">
+            <label className="ui-label" htmlFor="sink">
+              Where it went
+            </label>
+            <select id="sink" name="sink" className="ui-input" defaultValue="soil" data-testid="apply-sink">
+              {SINK_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>
+                  {t.label}
                 </option>
               ))}
             </select>

@@ -279,6 +279,13 @@ export const IconTrend = (p: IconProps) => (
   </Icon>
 )
 
+export const IconSink = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M8 1.5v6M5.5 5 8 7.5 10.5 5" />
+    <path d="M1.5 10h13M3.5 12.5h9M6 14.5h4" />
+  </Icon>
+)
+
 export const IconClock = (p: IconProps) => (
   <Icon {...p}>
     <circle cx="8" cy="8" r="5.5" />

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { Button } from '@/design'
 import { oc } from '@/lib/client'
+import { SINK_TYPES } from '@/lib/labels'
 import { FormDialog } from '../../form-dialog'
 
 export function CloseBatch({ code }: { code: string }) {
@@ -206,12 +207,14 @@ export function RecordApplication({ dispatchId }: { dispatchId: string }) {
         { name: 'farmName', label: 'Farm or site', required: true, testId: 'app-farm' },
         { name: 'areaHa', label: 'Area (ha)', type: 'number', step: '0.1', min: '0.1', required: true, testId: 'app-area' },
         { name: 'appliedMassKg', label: 'Applied mass (kg)', type: 'number', step: '1', min: '1', required: true, testId: 'app-mass' },
+        { name: 'sink', label: 'Sink', type: 'select', defaultValue: 'soil', options: SINK_TYPES, hint: 'Only soil storage is credited by this ledger version', testId: 'app-sink' },
       ]}
       transform={(v) => ({
         dispatchId,
         farmName: v.farmName,
         areaHa: Number(v.areaHa),
         appliedMassKg: Number(v.appliedMassKg),
+        sink: v.sink || 'soil',
       })}
     />
   )

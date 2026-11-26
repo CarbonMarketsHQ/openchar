@@ -137,3 +137,15 @@ export const CONTAINERS: { value: string; label: string }[] = [
   { value: 'tank', label: 'Tank' },
   { value: 'jerrycan', label: 'Jerrycan' },
 ]
+
+/** Where applied biochar ends up. Only soil is credited by this ledger version. */
+export const SINK_TYPES: { value: string; label: string }[] = [
+  { value: 'soil', label: 'Soil' },
+  { value: 'compost', label: 'Compost' },
+  { value: 'animal-feed', label: 'Animal feed' },
+  { value: 'concrete', label: 'Concrete' },
+  { value: 'asphalt', label: 'Asphalt' },
+  { value: 'filtration', label: 'Filtration' },
+  { value: 'other', label: 'Other' },
+]
+export const sinkLabel = (v: string) => SINK_TYPES.find((s) => s.value === v)?.label ?? statusLabel(v)

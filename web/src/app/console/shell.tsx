@@ -17,6 +17,7 @@ import {
   IconLayers,
   IconLog,
   IconPaperclip,
+  IconSink,
   IconTrend,
   IconMoon,
   IconSettings,
@@ -55,6 +56,7 @@ const REPORTING = [
   { href: '/console/reports', label: 'Reports', icon: <IconFile /> },
   { href: '/console/trends', label: 'Trends', icon: <IconTrend /> },
   { href: '/console/emissions', label: 'Emissions', icon: <IconBars /> },
+  { href: '/console/sinks', label: 'Sinks', icon: <IconSink /> },
   { href: '/console/compliance', label: 'Compliance', icon: <IconBook /> },
   { href: '/console/certify', label: 'Certify', icon: <IconUpload /> },
 ]
