@@ -4,6 +4,12 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Emissions by scope
+- An Emissions page splits the plant's emissions by scope. Scope 1 is fossil fuel from the fuel log. Scope 2 is metered grid electricity multiplied by the project's grid factor. Scope 3 is road transport for feedstock collection and biochar delivery.
+- It shows monthly totals over 3, 6, or 12 months, totals by source, and batch totals with emissions per dry tonne of biochar.
+- This page is for reviewing plant emissions only and does not change batch ledgers. A batch ledger still counts only what a user applies to its run inputs.
+- Tests: EMI1 in `evals/e2e/emissions.spec.ts`.
+
 ### Fuel and electricity
 - A new Energy page records fuel by type (diesel, petrol, LPG, biomass) and use (reactor start-up, generator, loader, vehicle trip), linked to a batch or recorded separately. Emissions use IPCC 2006 default emission factors, and biomass is counted as biogenic.
 - Cumulative electricity meter readings (kWh) can be entered manually, uploaded from a CSV file, or sent from a meter feed through the API. Electricity for a batch is calculated from the increase in its meter readings over the batch period.

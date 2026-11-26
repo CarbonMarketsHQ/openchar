@@ -11,8 +11,6 @@ works.
 
 ## Production and accounting
 
-- Emissions tagged by Scope 1, 2 and 3, with a dashboard by source, batch and
-  month.
 - A full mass and carbon balance across biochar, liquids and gas, with a
   check that the outputs add up to the inputs.
 - Bio-liquid tanks and drums tracked with the same QR units and custody chain
