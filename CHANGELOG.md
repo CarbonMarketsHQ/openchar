@@ -4,6 +4,13 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Road distances
+- Each consignment shows its road distance to the plant. Until the distance driven is recorded, it is calculated from the supplier and plant coordinates (straight-line distance multiplied by 1.3 for road travel) and marked as an estimate.
+- Each batch page shows feedstock collection and biochar delivery separately, with the mass-weighted distance and tonne-kilometres for each.
+- Each dispatch accepts either the destination coordinates or the distance driven.
+- The transport line in the ledger still uses the batch's run inputs. You can replace them with the delivery distances in one step, and the ledger is never updated automatically.
+- Tests: DIST1 and DIST2 in `evals/e2e/distances.spec.ts`.
+
 ### Duplicate records
 - The Gate page flags possible duplicates: two consignments from the same supplier within 1% in mass and within 30 minutes of each other, the same weighbridge slip recorded for two lots, or two slips with the same mass entered within 2 hours.
 - The Documents page flags any file uploaded more than once.

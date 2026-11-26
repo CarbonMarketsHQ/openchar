@@ -11,9 +11,6 @@ works.
 
 ## Production and accounting
 
-- Road distance for each consignment, calculated from the supplier's and the
-  plant's coordinates, with feedstock collection and biochar delivery
-  distances kept separate.
 - Diesel and other fuels per batch and per vehicle trip, including reactor
   start-up fuel, and electricity from a meter feed.
 - Emissions tagged by Scope 1, 2 and 3, with a dashboard by source, batch and
