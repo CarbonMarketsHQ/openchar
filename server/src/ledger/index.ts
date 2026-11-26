@@ -172,7 +172,7 @@ export function counterfactualCC3(): Counterfactual {
   return {
     co2eT: 0,
     assumption:
-      'CC3: residue left to decay with no commercial use; all stored biogenic carbon assumed emitted within 15 years in the counterfactual, so the deduction is zero. Assumption pending Isometric assessment with supplier evidence.',
+      'CC3: residue left to decay, with no commercial use. All its stored biogenic carbon is assumed emitted within 15 years without the project, so the deduction is zero. Pending Isometric\'s assessment of the supplier evidence.',
     datapointIds: ['counterfactual-evidence'],
   }
 }
@@ -323,6 +323,11 @@ export type RequirementState = {
 
 const DAY = 86400000
 
+/** "1 batch", "3 batches": counts read as words, not as "batch(es)". */
+function count(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`
+}
+
 export function requirementStates(s: ComplianceSnapshot): RequirementState[] {
   const out: RequirementState[] = []
   const now = Date.now()
@@ -336,8 +341,8 @@ export function requirementStates(s: ComplianceSnapshot): RequirementState[] {
     title: 'Production batch spans less than one month',
     state: worstSpan <= 31 ? 'pass' : 'fail',
     detail: spans.length
-      ? `longest closed batch spans ${worstSpan.toFixed(1)} days`
-      : 'no closed batches yet',
+      ? `Longest closed batch: ${worstSpan.toFixed(1)} days.`
+      : 'No closed batches yet.',
   })
 
   const underSampled = s.batches.filter((b) => b.closedAt && b.sampleCount < 3)
@@ -346,8 +351,8 @@ export function requirementStates(s: ComplianceSnapshot): RequirementState[] {
     title: 'Method A: 3 independent samples per batch, 30-sample initial campaign',
     state: underSampled.length ? 'fail' : s.initialSampleCount >= 30 ? 'pass' : 'warn',
     detail: underSampled.length
-      ? `${underSampled.length} closed batch(es) below 3 samples`
-      : `${s.initialSampleCount} of 30 initial samples collected`,
+      ? `${count(underSampled.length, 'closed batch', 'closed batches')} with fewer than 3 samples.`
+      : `${s.initialSampleCount} of the 30 initial samples collected.`,
   })
 
   out.push({
@@ -355,15 +360,15 @@ export function requirementStates(s: ComplianceSnapshot): RequirementState[] {
     title: 'Method B sampling only after demonstrated consistency',
     state: s.methodBActive ? 'warn' : 'pass',
     detail: s.methodBActive
-      ? 'Method B active: temperature and residence-time consistency evidence must be on file'
-      : 'Method A in force; Method B unlocks after consistency is demonstrated from telemetry',
+      ? 'Method B in use. Temperature and residence-time consistency evidence must be on file.'
+      : 'Method A in use. Method B opens once the telemetry shows consistent runs.',
   })
 
   out.push({
     id: 'R-ADXG-0',
     title: 'Moisture regime declared and followed',
     state: 'pass',
-    detail: `regime: ${s.moistureRegime}`,
+    detail: s.moistureRegime === 'every-batch' ? 'Moisture measured on every batch.' : `Moisture regime: ${s.moistureRegime}.`,
   })
 
   const noTemp = s.batches.filter((b) => !b.hasTemperatureLog)
@@ -371,7 +376,7 @@ export function requirementStates(s: ComplianceSnapshot): RequirementState[] {
     id: 'G-KQSC-0',
     title: 'Temperature sensor logging through every production run',
     state: noTemp.length ? 'fail' : 'pass',
-    detail: noTemp.length ? `${noTemp.length} batch(es) without a temperature log` : 'all batches logged',
+    detail: noTemp.length ? `${count(noTemp.length, 'batch', 'batches')} without a temperature log.` : 'Every batch has a temperature log.',
   })
 
   const noDur = s.batches.filter((b) => !b.hasDurationLog)
@@ -379,7 +384,7 @@ export function requirementStates(s: ComplianceSnapshot): RequirementState[] {
     id: 'G-7CN1-0',
     title: 'Batch duration tracked',
     state: noDur.length ? 'fail' : 'pass',
-    detail: noDur.length ? `${noDur.length} batch(es) without duration` : 'all batches timed',
+    detail: noDur.length ? `${count(noDur.length, 'batch', 'batches')} without a recorded duration.` : 'Every batch is timed.',
   })
 
   const noGps = s.batches.filter((b) => !b.hasGps)
@@ -387,7 +392,7 @@ export function requirementStates(s: ComplianceSnapshot): RequirementState[] {
     id: 'G-1CDW-0',
     title: 'Production unit geolocated at run start',
     state: noGps.length ? 'fail' : 'pass',
-    detail: noGps.length ? `${noGps.length} batch(es) without GPS` : 'reactor location on every run',
+    detail: noGps.length ? `${count(noGps.length, 'batch', 'batches')} without GPS.` : 'Reactor location recorded on every run.',
   })
 
   out.push({
@@ -399,8 +404,8 @@ export function requirementStates(s: ComplianceSnapshot): RequirementState[] {
         : 'fail'
       : 'warn',
     detail: s.stackTestDoneAt
-      ? `last test ${s.stackTestDoneAt.slice(0, 10)}`
-      : 'no stack test on record; book one during hot trials',
+      ? `Last test on ${s.stackTestDoneAt.slice(0, 10)}.`
+      : 'No stack test on record. Book one during the hot trials.',
   })
 
   const oldest = s.stockpiles
@@ -412,15 +417,15 @@ export function requirementStates(s: ComplianceSnapshot): RequirementState[] {
     title: 'Stockpiling capped at 12 months post-production',
     state: worstAge > 365 ? 'fail' : worstAge > 270 ? 'warn' : 'pass',
     detail: oldest.length
-      ? `oldest unapplied lot is ${worstAge.toFixed(0)} days old`
-      : 'no unapplied stockpile',
+      ? `Oldest unapplied lot: ${worstAge.toFixed(0)} days.`
+      : 'No unapplied stockpile.',
   })
 
   out.push({
     id: 'R-8W08-0',
     title: 'dMRV: offline capture, tamper evidence, anomaly flags, 30-day upload',
     state: s.hashChainIntact && s.fieldSyncMaxLagDays <= 30 ? 'pass' : 'fail',
-    detail: `hash chain ${s.hashChainIntact ? 'intact' : 'BROKEN'}; worst sync lag ${s.fieldSyncMaxLagDays} days`,
+    detail: `${s.hashChainIntact ? 'Hash chain intact.' : 'Hash chain BROKEN.'} Slowest field sync: ${s.fieldSyncMaxLagDays} days.`,
   })
 
   return out

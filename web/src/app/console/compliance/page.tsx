@@ -8,8 +8,13 @@ const TONE = { pass: 'positive', warn: 'caution', fail: 'negative' } as const
 function Rows({ rows }: { rows: Compliance['requirements'] }) {
   return (
     <div className="ui-tablewrap">
-      <table className="ui-table">
+      <table className="ui-table compliance-table">
         <caption className="u-sr">Requirement states computed from live project data</caption>
+        <colgroup>
+          <col style={{ width: '46%' }} />
+          <col style={{ width: '12%' }} />
+          <col />
+        </colgroup>
         <thead>
           <tr>
             <th scope="col">Requirement</th>
@@ -31,7 +36,7 @@ function Rows({ rows }: { rows: Compliance['requirements'] }) {
               <td>
                 <Badge tone={TONE[r.state]}>{statusLabel(r.state)}</Badge>
               </td>
-              <td style={{ maxWidth: '38ch' }}>{r.detail}</td>
+              <td>{r.detail}</td>
             </tr>
           ))}
         </tbody>
@@ -48,8 +53,8 @@ export default async function CompliancePage() {
       <div className="page-head">
         <h1>Compliance</h1>
         <p className="sub">
-          The Isometric requirements table, evaluated live against this project's data. Nothing
-          here is hand-set; fix the data and the state follows.
+          The Isometric requirements, checked live against this project's data. Nothing here is set
+          by hand: fix the data and the state follows.
         </p>
       </div>
       <div data-testid="compliance-table" style={{ display: 'grid', gap: 'var(--sp-6)' }}>
@@ -65,7 +70,7 @@ export default async function CompliancePage() {
         </Card>
         <Card>
           <CardHead>
-            <CardTitle desc="What the discovery call surfaced, tracked to closure.">Site readiness</CardTitle>
+            <CardTitle desc="Plant-level conditions a verifier checks before the first batch counts.">Site readiness</CardTitle>
           </CardHead>
           <CardBody>
             <Rows rows={compliance.site} />

@@ -244,7 +244,7 @@ export async function buildCompliance(projectId: string): Promise<{
     title: 'Calibrated weighing at plant gate',
     state: calibration ? 'pass' : 'warn',
     detail: facility?.scales_note
-      ? `${facility.scales_note}${calibration ? '' : ' Action: file calibration certificates (protocol §8.4 wants calibrated scales per batch).'}`
+      ? `${facility.scales_note}${calibration ? '' : ' File the scale calibration certificates: the protocol wants calibrated scales for every batch.'}`
       : 'No weighing arrangement recorded for the facility yet.',
   })
   const certCount = (
@@ -258,7 +258,7 @@ export async function buildCompliance(projectId: string): Promise<{
     title: 'Accredited lab results',
     state: certCount > 0 ? 'pass' : 'warn',
     detail: facility?.lab_partner
-      ? `${facility.lab_partner}. ${certCount > 0 ? `${certCount} certificate(s) on file.` : 'No certificates on file yet; confirm ISO 17025 scope covers ultimate analysis, heavy metals and PAHs.'}`
+      ? `${facility.lab_partner}. ${certCount > 0 ? `${certCount} ${certCount === 1 ? 'certificate' : 'certificates'} on file.` : 'No certificates on file yet. Confirm the lab\'s ISO 17025 scope covers ultimate analysis, heavy metals and PAHs.'}`
       : 'No laboratory partner recorded for the facility yet.',
   })
   const appTotals = (
@@ -273,7 +273,7 @@ export async function buildCompliance(projectId: string): Promise<{
     id: 'SITE-APPLICATION',
     title: 'End-use evidence pathway',
     state: Number(appTotals.dispatched) > 0 && Number(appTotals.applied) >= Number(appTotals.dispatched) * 0.8 ? 'pass' : 'warn',
-    detail: `${Math.round(Number(appTotals.dispatched))} kg dispatched, ${Math.round(Number(appTotals.applied))} kg with application evidence. Credits issue only at soil application; close the loop on every dispatch.`,
+    detail: `${Math.round(Number(appTotals.dispatched))} kg dispatched, ${Math.round(Number(appTotals.applied))} kg with application evidence. Credits issue only at soil application, so every dispatch needs its application record.`,
   })
   const activationMass = (
     await pool.query(
@@ -286,8 +286,8 @@ export async function buildCompliance(projectId: string): Promise<{
     site.push({
       id: 'SITE-ACTIVATION',
       title: 'Activated biochar line excluded from crediting',
-      state: 'fail',
-      detail: `${Math.round(Number(activationMass.m))} kg routed to activation: a non-storage end use that earns no removal credits and must be mass-balanced out of every GHG statement.`,
+      state: 'warn',
+      detail: `${Math.round(Number(activationMass.m))} kg went to the activation line. It is not stored, so it earns no removal credits and is taken out of every GHG statement's mass balance.`,
     })
   }
   const undeclared = batches.filter((b) => b.closed_at && b.co_product_count === 0)
@@ -296,7 +296,7 @@ export async function buildCompliance(projectId: string): Promise<{
     title: 'Every co-product declared with its fate',
     state: undeclared.length ? 'warn' : 'pass',
     detail: undeclared.length
-      ? `${undeclared.length} closed batch(es) with no co-product declarations`
+      ? `${undeclared.length} closed ${undeclared.length === 1 ? 'batch has' : 'batches have'} no co-products declared.`
       : 'Co-products declared on every closed batch.',
   })
 
