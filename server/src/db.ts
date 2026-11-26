@@ -226,6 +226,10 @@ export async function migrate(): Promise<void> {
   await pool.query(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS grid_ef_source text`)
   await pool.query(`ALTER TABLE facilities ADD COLUMN IF NOT EXISTS mqtt_url text`)
   await pool.query(`ALTER TABLE facilities ADD COLUMN IF NOT EXISTS mqtt_topic text`)
+  await pool.query(`ALTER TABLE consignments ADD COLUMN IF NOT EXISTS distance_km numeric`)
+  await pool.query(`ALTER TABLE dispatches ADD COLUMN IF NOT EXISTS distance_km numeric`)
+  await pool.query(`ALTER TABLE dispatches ADD COLUMN IF NOT EXISTS dest_lat numeric`)
+  await pool.query(`ALTER TABLE dispatches ADD COLUMN IF NOT EXISTS dest_lng numeric`)
 }
 
 /** Canonical JSON: keys sorted recursively, so a jsonb round-trip through

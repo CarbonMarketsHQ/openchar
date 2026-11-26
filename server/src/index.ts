@@ -28,6 +28,7 @@ import { registerExportRoutes } from './export.js'
 import { registerShiftRoutes } from './shifts.js'
 import { registerCalibrationRoutes, sendCalibrationAlerts } from './calibration.js'
 import { registerDuplicateRoutes } from './duplicates.js'
+import { distanceFor, plantPoint, registerDistanceRoutes } from './distances.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -91,6 +92,7 @@ registerExportRoutes(app)
 registerShiftRoutes(app)
 registerCalibrationRoutes(app)
 registerDuplicateRoutes(app)
+registerDistanceRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 
@@ -322,13 +324,20 @@ app.get('/consignments', async (req, reply) => {
   if (!ctx) return
   const { state } = req.query as { state?: string }
   const { rows } = await pool.query(
-    `SELECT c.*, s.name AS supplier_name FROM consignments c JOIN suppliers s ON s.id = c.supplier_id
+    `SELECT c.*, s.name AS supplier_name, s.lat AS supplier_lat, s.lng AS supplier_lng
+     FROM consignments c JOIN suppliers s ON s.id = c.supplier_id
      WHERE c.project_id = $1 ${state ? 'AND c.state = $2' : ''} ORDER BY c.captured_at DESC`,
     state ? [ctx.projectId, state] : [ctx.projectId]
   )
+  const plant = await plantPoint(ctx.projectId)
   return rows.map((c) => ({
     id: c.id,
     supplierName: c.supplier_name,
+    distance: distanceFor(
+      c.distance_km,
+      c.supplier_lat === null ? null : { lat: Number(c.supplier_lat), lng: Number(c.supplier_lng) },
+      plant
+    ),
     estMassKg: Number(c.est_mass_kg),
     moistureFrac: c.moisture_frac === null ? null : Number(c.moisture_frac),
     category: c.category,
