@@ -5,6 +5,7 @@ import { RECORD_LABELS, docTypeLabel, recordHref } from '@/lib/labels'
 import { fmtDate } from '../bits'
 import type { RecordOption } from './add-document'
 import { AttachDocument } from './attach-document'
+import { NotDuplicate } from '../gate/duplicates'
 
 export type Doc = {
   id: string
@@ -35,6 +36,20 @@ function FileCell({ doc }: { doc: Doc }) {
   )
 }
 
+/** A flag when the same file sits in the documents more than once. */
+function SameFile({ group }: { group?: string[] }) {
+  if (!group) return null
+  const others = group.length - 1
+  return (
+    <div className="doc-same" data-testid="doc-same-file">
+      <Badge tone="caution" variant="dashed">
+        Same file as {others === 1 ? 'one other document' : `${others} other documents`}
+      </Badge>
+      <NotDuplicate kind="file" ids={group} />
+    </div>
+  )
+}
+
 /** The records a document supports, and the control to add one more. */
 function Links({ doc, records }: { doc: Doc; records: RecordOption[] }) {
   return (
@@ -56,7 +71,15 @@ function Links({ doc, records }: { doc: Doc; records: RecordOption[] }) {
 }
 
 /** Every document with its type, the records it supports and its file. */
-export function DocumentTable({ docs, records }: { docs: Doc[]; records: RecordOption[] }) {
+export function DocumentTable({
+  docs,
+  records,
+  sameFile = {},
+}: {
+  docs: Doc[]
+  records: RecordOption[]
+  sameFile?: Record<string, string[]>
+}) {
   return (
     <div className="ui-tablewrap doc-table">
       <table className="ui-table">
@@ -82,6 +105,7 @@ export function DocumentTable({ docs, records }: { docs: Doc[]; records: RecordO
                     sha256 {d.sha256.slice(0, 12)}
                   </div>
                 )}
+                <SameFile group={sameFile[d.id]} />
               </td>
               <td>
                 <Badge data-testid="doc-type-badge">{docTypeLabel(d.type)}</Badge>
@@ -124,7 +148,15 @@ export function DocumentList({ docs }: { docs: Doc[] }) {
 }
 
 /** The same documents as cards, for phone widths where the table is too narrow. */
-export function DocumentCards({ docs, records }: { docs: Doc[]; records: RecordOption[] }) {
+export function DocumentCards({
+  docs,
+  records,
+  sameFile = {},
+}: {
+  docs: Doc[]
+  records: RecordOption[]
+  sameFile?: Record<string, string[]>
+}) {
   return (
     <div className="doc-cards">
       {docs.map((d) => (
@@ -133,6 +165,7 @@ export function DocumentCards({ docs, records }: { docs: Doc[]; records: RecordO
             <Link href={`/console/sources/${d.id}`}>{d.title}</Link>
             <Badge>{docTypeLabel(d.type)}</Badge>
           </div>
+          <SameFile group={sameFile[d.id]} />
           <Links doc={d} records={records} />
           <div className="doc-card-foot muted">
             <span>Added {fmtDate(d.createdAt)}</span>

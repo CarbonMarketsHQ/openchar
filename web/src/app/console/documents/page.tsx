@@ -12,13 +12,16 @@ export default async function DocumentsPage({
   searchParams: Promise<{ type?: string; record?: string }>
 }) {
   const { type, record } = await searchParams
-  const [data, consignments, lots, batches, facilities] = await Promise.all([
+  const [data, consignments, lots, batches, facilities, dupes] = await Promise.all([
     api<{ documents: Doc[] }>('/documents'),
     api<Consignment[]>('/consignments'),
     api<Lot[]>('/lots'),
     api<BatchRow[]>('/batches'),
     api<Facility[]>('/facilities'),
+    api<{ kind: string; ids: string[] }[]>('/duplicates'),
   ])
+  const sameFile: Record<string, string[]> = {}
+  for (const d of dupes ?? []) if (d.kind === 'file') for (const id of d.ids) sameFile[id] = d.ids
   if (!data || !consignments || !lots || !batches || !facilities) return <DataFallback />
 
   const records: RecordOption[] = [
@@ -104,8 +107,8 @@ export default async function DocumentsPage({
             </p>
           ) : (
             <>
-              <DocumentTable docs={shown} records={records} />
-              <DocumentCards docs={shown} records={records} />
+              <DocumentTable docs={shown} records={records} sameFile={sameFile} />
+              <DocumentCards docs={shown} records={records} sameFile={sameFile} />
             </>
           )}
         </CardBody>

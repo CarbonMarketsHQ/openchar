@@ -1,17 +1,21 @@
 import Link from 'next/link'
-import { Badge, Card, CardBody, CardHead, CardTitle } from '@/design'
+import { Badge, Card, CardBody, CardHead, CardTitle, Notice } from '@/design'
 import { api, type BatchRow, type Consignment, type Lot } from '@/lib/api'
 import { DataFallback, fmtDate, fmtKg } from '../bits'
 import { statusLabel } from '@/lib/labels'
 import { AttachLot } from './attach-lot'
 import { NewLot } from './new-lot'
+import { NotDuplicate } from './duplicates'
 
 export default async function Gate() {
-  const [consignments, lots, batches] = await Promise.all([
+  const [consignments, lots, batches, dupes] = await Promise.all([
     api<Consignment[]>('/consignments'),
     api<Lot[]>('/lots'),
     api<BatchRow[]>('/batches'),
+    api<{ kind: string; ids: string[]; reason: string }[]>('/duplicates'),
   ])
+  const gateDupes = (dupes ?? []).filter((d) => d.kind !== 'file')
+  const flagged = new Set(gateDupes.flatMap((d) => d.ids))
   if (!consignments || !lots || !batches) return <DataFallback />
   const openCodes = batches.filter((b) => b.status === 'open').map((b) => b.id)
   const pending = consignments.filter((c) => c.state === 'received')
@@ -27,6 +31,23 @@ export default async function Gate() {
         Consignments arrive from the collection point with the field app's records. Receiving one
         into a lot pairs the hopper-scale mass with the weighbridge slip.
       </p>
+
+      {gateDupes.length > 0 && (
+        <div data-testid="duplicates">
+          <Notice tone="caution" title={gateDupes.length === 1 ? 'A possible duplicate' : `${gateDupes.length} possible duplicates`}>
+            <ul className="dupe-list">
+              {gateDupes.map((d) => (
+                <li key={`${d.kind}:${d.ids.join('|')}`} data-testid="duplicate-item">
+                  <span>
+                    <span className="mono">{d.ids.join(' and ')}</span>: {d.reason}.
+                  </span>
+                  <NotDuplicate kind={d.kind} ids={d.ids} />
+                </li>
+              ))}
+            </ul>
+          </Notice>
+        </div>
+      )}
 
       <Card>
         <CardHead>
@@ -49,7 +70,17 @@ export default async function Gate() {
               <tbody>
                 {consignments.map((c) => (
                   <tr key={c.id} id={`consignment-${c.id}`} data-testid="consignment-row">
-                    <td className="mono">{c.id}</td>
+                    <td className="mono">
+                      {c.id}
+                      {flagged.has(c.id) && (
+                        <>
+                          {' '}
+                          <Badge tone="caution" variant="dashed" data-testid="duplicate-badge">
+                            Possible duplicate
+                          </Badge>
+                        </>
+                      )}
+                    </td>
                     <td>{c.supplierName}</td>
                     <td data-numeric>{fmtKg(c.estMassKg)}</td>
                     <td data-numeric>{c.moistureFrac === null ? '–' : `${(c.moistureFrac * 100).toFixed(0)}%`}</td>
