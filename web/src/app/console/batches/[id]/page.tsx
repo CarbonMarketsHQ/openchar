@@ -22,6 +22,7 @@ import { DocumentList, type Doc } from '../../documents/document-list'
 import { Km } from '../../distance'
 import { ApplyDelivery, RecordConsignmentKm, SetDelivery } from './transport'
 import { ApplyToLedger, LogFuel } from '../../energy/forms'
+import { BalanceCard, type Balance } from './balance'
 import { fmtCo2e, fuelUseLabel } from '@/lib/labels'
 import type { Distance } from '@/lib/api'
 
@@ -43,13 +44,14 @@ const STATUS_TONE = { open: 'info', sampled: 'positive', 'awaiting-lab': 'cautio
 
 export default async function BatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [batch, units, docs, shiftLog, transport, energy] = await Promise.all([
+  const [batch, units, docs, shiftLog, transport, energy, balance] = await Promise.all([
     api<BatchDetail>(`/batches/${encodeURIComponent(id)}`),
     api<UnitRow[]>(`/units?batch=${encodeURIComponent(id)}`),
     api<{ documents: Doc[] }>(`/documents?record=${encodeURIComponent(`batch:${id}`)}`),
     api<{ shifts: { operator: string; batches: string[] }[] }>('/shifts?limit=200'),
     api<Transport>(`/batches/${encodeURIComponent(id)}/transport`),
     api<Energy>(`/batches/${encodeURIComponent(id)}/energy`),
+    api<Balance>(`/batches/${encodeURIComponent(id)}/balance`),
   ])
   const operators = [
     ...new Set((shiftLog?.shifts ?? []).filter((s) => s.batches.includes(id)).map((s) => s.operator)),
@@ -284,6 +286,8 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
           </CardBody>
         </Card>
       </div>
+
+      {balance && <BalanceCard b={balance} />}
 
       {transport && (
         <Card data-testid="batch-transport">
