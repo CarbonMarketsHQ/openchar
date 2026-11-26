@@ -296,6 +296,20 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
                           <Badge tone="positive">Applied</Badge>
                           <span>{a.farmName}</span>
                           <span className="num">{fmtKg(a.appliedMassKg)}</span>
+                          {(a.boundaryPoints || a.photos || a.signedBy) && (
+                            <span className="muted" data-testid="application-evidence">
+                              {[
+                                a.areaHa ? `${Number(a.areaHa).toLocaleString('en-GB', { maximumFractionDigits: 2 })} ha` : null,
+                                a.boundaryPoints ? `boundary walked, ${a.boundaryPoints} points` : null,
+                                a.gps ? 'GPS' : null,
+                                a.photos ? `${a.photos} ${a.photos === 1 ? 'photo' : 'photos'}` : null,
+                                a.video ? 'video' : null,
+                                a.signedBy ? `signed by ${a.signedBy}` : null,
+                              ]
+                                .filter(Boolean)
+                                .join(' · ')}
+                            </span>
+                          )}
                         </div>
                       ))
                     ) : (

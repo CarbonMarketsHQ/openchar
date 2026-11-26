@@ -125,7 +125,18 @@ export type BatchDetail = BatchRow & {
     toName: string
     massKg: number
     dispatchedAt: string
-    applications: { id: string; farmName: string; appliedMassKg: number; appliedAt: string }[]
+    applications: {
+      id: string
+      farmName: string
+      appliedMassKg: number
+      appliedAt: string
+      areaHa?: number
+      gps?: boolean
+      boundaryPoints?: number
+      photos?: number
+      video?: boolean
+      signedBy?: string | null
+    }[]
   }[]
   ops: { transportKm: number; transportMassT: number; electricityKwh: number } | null
   lots: { id: string; hopperMassKg: number }[]
