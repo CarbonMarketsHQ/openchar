@@ -4,6 +4,12 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Trends
+- A new Trends page charts each batch from oldest to newest: dry biochar yield, throughput per day and per shift, residence time, electricity per dry tonne and fuel per dry tonne. Total production is shown by month.
+- All chart values come from records already in OpenChar. If a batch is missing a record needed for a value, the chart shows a gap instead of an estimate.
+- The sidebar now groups Trends, Emissions, Compliance and Certify under Reporting.
+- Tests: TR1 in `evals/e2e/trends.spec.ts`.
+
 ### Bio-liquid containers
 - Co-products on a batch page can be packaged into drums, IBC totes, tanks or jerrycans. Each container is a unit with its own QR label and follows the same chain of custody as biochar bags: splitting, merging, delivery and use.
 - Total packaged mass cannot exceed a co-product's declared mass, and biochar and bio-liquid cannot be merged into one unit.

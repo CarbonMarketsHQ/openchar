@@ -11,8 +11,6 @@ works.
 
 ## Production and accounting
 
-- Trends across batches and months: biochar yield, throughput per day and per
-  shift, reactor residence time, and energy use.
 - Batch and monthly reports as PDF and Excel.
 
 ## End use and carbon sinks
