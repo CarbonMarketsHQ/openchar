@@ -6,9 +6,8 @@
  * session's workspace on every request.
  */
 import { createHash } from 'node:crypto'
-import { createReadStream, createWriteStream } from 'node:fs'
-import { mkdir, rename, stat } from 'node:fs/promises'
-import path from 'node:path'
+import { createReadStream } from 'node:fs'
+import { stat } from 'node:fs/promises'
 import Fastify, { type FastifyRequest } from 'fastify'
 import multipart from '@fastify/multipart'
 import rateLimit from '@fastify/rate-limit'
@@ -24,6 +23,8 @@ import { appendEvents, migrate, newId, pool, verifyChain } from './db.js'
 import { buildCertifyPayload, buildCompliance, buildLedger, findAnomalies, resolveBatch } from './report.js'
 import { aggregateSensorSeries, certifyConfig, certifySubmit } from './certify.js'
 import { registerUnitRoutes } from './units.js'
+import { allLinks, registerDocumentRoutes } from './documents.js'
+import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
 import { isSessionlessExtensionRoute, loadExtensions } from './extensions.js'
@@ -32,7 +33,6 @@ if (!process.env.API_TOKEN || process.env.API_TOKEN === 'change-me') {
   console.error('API_TOKEN is required: set it to a long random string (openssl rand -hex 24)')
   process.exit(1)
 }
-const FILES_DIR = process.env.FILES_DIR || './data/files'
 
 type Req = FastifyRequest & { user?: SessionUser }
 
@@ -82,6 +82,7 @@ app.get('/health', async () => {
 
 registerAuthRoutes(app)
 registerUnitRoutes(app)
+registerDocumentRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 
@@ -770,41 +771,25 @@ app.post('/applications', async (req, reply) => {
 app.post('/sources/upload', async (req, reply) => {
   const ctx = await requireProject(req, reply)
   if (!ctx) return
-  await mkdir(FILES_DIR, { recursive: true })
-  let kind = 'evidence'
-  let title = ''
-  let note: string | null = null
-  let saved: { path: string; sha256: string; mime: string; size: number } | null = null
-  for await (const part of req.parts()) {
-    if (part.type === 'file') {
-      const tmp = path.join(FILES_DIR, `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}`)
-      const hash = createHash('sha256')
-      let size = 0
-      const sink = createWriteStream(tmp)
-      for await (const chunk of part.file) {
-        hash.update(chunk as Buffer)
-        size += (chunk as Buffer).length
-        sink.write(chunk)
-      }
-      await new Promise((res) => sink.end(res))
-      const sha256 = hash.digest('hex')
-      const ext = path.extname(part.filename ?? '').slice(0, 10) || '.bin'
-      const finalPath = path.join(FILES_DIR, `${sha256}${ext}`)
-      await rename(tmp, finalPath)
-      saved = { path: finalPath, sha256, mime: part.mimetype, size }
-      if (!title) title = part.filename ?? 'Uploaded file'
-    } else if (part.fieldname === 'kind') kind = String(part.value)
-    else if (part.fieldname === 'title') title = String(part.value)
-    else if (part.fieldname === 'note') note = String(part.value)
-  }
-  if (!saved) return reply.code(400).send({ error: 'no file in upload' })
+  const { fields, file } = await saveUpload(req)
+  if (!file) return reply.code(400).send({ error: 'no file in upload' })
   const id = newId('src')
   await pool.query(
     `INSERT INTO sources (id, project_id, kind, title, note, file_path, file_sha256, mime, size_bytes)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-    [id, ctx.projectId, kind, title, note, saved.path, saved.sha256, saved.mime, saved.size]
+    [
+      id,
+      ctx.projectId,
+      fields.kind || 'evidence',
+      fields.title || file.filename || 'Uploaded file',
+      fields.note ?? null,
+      file.path,
+      file.sha256,
+      file.mime,
+      file.size,
+    ]
   )
-  return { id, sha256: saved.sha256 }
+  return { id, sha256: file.sha256 }
 })
 
 app.get('/sources/:id', async (req, reply) => {
@@ -832,6 +817,7 @@ app.get('/sources/:id', async (req, reply) => {
     mime: s.mime,
     sizeBytes: s.size_bytes === null ? null : Number(s.size_bytes),
     sha256: s.file_sha256,
+    links: (await allLinks(ctx.projectId)).get(s.id) ?? [],
   }
 })
 
