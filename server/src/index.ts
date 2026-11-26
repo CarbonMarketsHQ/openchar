@@ -32,6 +32,7 @@ import { distanceFor, plantPoint, registerDistanceRoutes } from './distances.js'
 import { registerEnergyRoutes } from './energy.js'
 import { registerEmissionsRoutes } from './emissions.js'
 import { registerBalanceRoutes } from './balance.js'
+import { registerTrendRoutes } from './trends.js'
 import { saveUpload } from './files.js'
 import { startMqttIngest } from './ingest.js'
 import { parquetWriteBuffer } from 'hyparquet-writer'
@@ -99,6 +100,7 @@ registerDistanceRoutes(app)
 registerEnergyRoutes(app)
 registerEmissionsRoutes(app)
 registerBalanceRoutes(app)
+registerTrendRoutes(app)
 
 /* ----------------------------------------------------------- public read */
 
