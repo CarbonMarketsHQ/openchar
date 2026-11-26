@@ -133,7 +133,11 @@ export function registerDocumentRoutes(app: FastifyInstance): void {
         [id, ctx.projectId, record.kind, record.id]
       )
     }
-    return { id, sha256: file.sha256 }
+    const same = await pool.query(
+      `SELECT id, title FROM sources WHERE project_id = $1 AND file_sha256 = $2 AND id <> $3 ORDER BY created_at`,
+      [ctx.projectId, file.sha256, id]
+    )
+    return { id, sha256: file.sha256, duplicateOf: same.rows.map((r) => ({ id: r.id, title: r.title })) }
   })
 
   /** Attach an existing document to another record. */
