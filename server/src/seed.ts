@@ -140,6 +140,32 @@ async function seed() {
      ('bat-ht01', $1, $2, 'HT-01', 'open', $7, NULL, 1900, NULL, NULL, NULL, -0.30, 36.08, 'Continuous-feed shakedown run in progress')`,
     [DEMO.projectId, DEMO.facilityId, iso(20), iso(6), iso(10), iso(3), iso(2)]
   )
+  // Two twelve-hour shifts a day around the shakedown run, changing at 06:00
+  // and 18:00 plant time (UTC+3), the last one still on.
+  const HOUR = 3600000
+  let change = new Date(Date.now())
+  change.setUTCMinutes(0, 0, 0)
+  while (![3, 15].includes(change.getUTCHours())) change = new Date(change.getTime() - HOUR)
+  const at = (hoursBefore: number, plusMin = 0) => new Date(change.getTime() - hoursBefore * HOUR + plusMin * 60000).toISOString()
+  await pool.query(
+    `INSERT INTO shifts (id, project_id, facility_id, operator, started_at, ended_at, notes, handover) VALUES
+     ('shf-demo-1', $1, $2, 'Otieno Ochieng', $3, $4, 'Started HT-01 on maize cobs. Reactor reached 500 °C in 50 minutes.',
+      'HT-01 steady between 520 and 560 °C. The hopper scale reads 4 kg high against the check weight, so recalibration is booked.'),
+     ('shf-demo-2', $1, $2, 'Achieng Atieno', $4, $5, 'Feed auger jammed and was cleared by hand in 40 minutes.',
+      'Auger running again. Watch the feed rate for the first hour.'),
+     ('shf-demo-3', $1, $2, 'Wanjiru Kamau', $5, $6, 'Grid outage for 95 minutes. Feed stopped while the generator took the load.',
+      'Generator diesel is down to a quarter tank. Order more before tonight.'),
+     ('shf-demo-4', $1, $2, 'Otieno Ochieng', $6, NULL, NULL, NULL)`,
+    [DEMO.projectId, DEMO.facilityId, at(36), at(24), at(12), at(0)]
+  )
+  await pool.query(
+    `INSERT INTO downtime (id, project_id, facility_id, cause, started_at, ended_at, note) VALUES
+     ('dwn-demo-1', $1, $2, 'breakdown', $3, $4, 'Feed auger jammed, cleared by hand'),
+     ('dwn-demo-2', $1, $2, 'power-outage', $5, $6, 'Grid outage. Feed stopped while the generator took the load'),
+     ('dwn-demo-3', $1, $2, 'planned-maintenance', $7, $8, 'Thermocouple T2 replaced between runs')`,
+    [DEMO.projectId, DEMO.facilityId, at(24, 490), at(24, 530), at(12, 185), at(12, 280), at(120, 60), at(120, 300)]
+  )
+
   await pool.query(`UPDATE lots SET batch_id = 'bat-ht02' WHERE id IN ('L-01', 'L-02')`)
   await pool.query(`UPDATE lots SET batch_id = 'bat-ht03' WHERE id = 'L-03'`)
 
