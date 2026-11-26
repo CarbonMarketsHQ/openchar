@@ -100,6 +100,7 @@ All settings live in `.env`. Only the first two are required.
 | `APP_URL` | The address people use. Links in emails point here. |
 | `SIGNUP_MODE` | `closed` (default): only the first account signs up, everyone else is invited. `open`: anyone who can reach the server can create a workspace. |
 | `MAIL_WEBHOOK_URL` | Where to post outgoing email as JSON. Empty means links go to the API log. |
+| `CALIBRATION_ALERT_EMAILS` | `1` emails workspace admins when an instrument's calibration is due within 30 days or has lapsed. Off by default. |
 | `DOMAIN` | Your domain, for the `tls` profile. |
 | `PUBLIC_PROJECT_ID` | The project shown at `/public`. It must also be published from the Projects page. Any published project is also at `/public/<project id>`. |
 | `ISOMETRIC_API_KEY`, `ISOMETRIC_CLIENT_SECRET` | Isometric Certify credentials. Without them, the registry connector builds the submission and shows it for review, but does not send it. |

@@ -4,6 +4,13 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Calibration register
+- A Calibration page lists every instrument whose readings are used in records (scales, thermocouples, and moisture, flow, energy and gas meters) and shows its last calibration, next due date and status.
+- Recording a calibration sets the next due date from the instrument's calibration interval, unless the certificate has a different date. A failed calibration marks the instrument out of use.
+- The Overview page highlights instruments due within 30 days. Both the Overview and Compliance pages list overdue instruments by name.
+- Workspace admins can receive email alerts, sent once per instrument for each due date. Alerts are off unless `CALIBRATION_ALERT_EMAILS=1` is set on the server.
+- Tests: CAL1 and CAL2 in `evals/e2e/calibration.spec.ts`.
+
 ### Shift log
 - A Shift log page records who ran the reactor, when each shift started and ended, and what happened during it.
 - Each shift ends with a handover note, and the latest note is shown at the top for the next operator.
