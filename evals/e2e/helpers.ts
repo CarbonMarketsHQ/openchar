@@ -9,7 +9,7 @@ export const SEED = {
   apiUrl: 'http://localhost:8788',
   dbUrl: 'postgres://biochar:biochar@localhost:5466/biochar',
   batches: { open: 'HT-01', sampled: 'HT-02', awaitingLab: 'HT-03' },
-  suppliers: ['Bahati Farmers Cooperative (demo)', 'Rongai Maize Growers (demo)', 'Subukia Village Cluster (demo)'],
+  suppliers: ['Bahati Farmers Co-op', 'Rongai Maize Growers', 'Subukia Village Cluster'],
   ledger: {
     gross: 2.9297248,
     // Woolf 200-year model at the demo's 21.5 °C soil and H/Corg 0.42:

@@ -55,24 +55,24 @@ async function seed() {
     `INSERT INTO projects (id, workspace_id, name, district, synthetic, public, t_soil_c, t_soil_source, grid_ef_t_per_kwh, grid_ef_source) VALUES
      ($1, $2, 'Nyota Crop-Residue Biochar', 'Nakuru County, Kenya', true, true, 21.5,
       'Lembrechts et al. 2022 global soil temperature database, Nakuru County, to be replaced with a site measurement',
-      0.000716, 'illustrative value for the demo (0.716 kg CO2e per kWh); replace with the national grid factor')`,
+      0.000716, 'illustrative value for the demo (0.716 kg CO2e per kWh), to be replaced with the national grid factor')`,
     [DEMO.projectId, DEMO.workspaceId]
   )
 
   await pool.query(
     `INSERT INTO facilities (id, project_id, name, gps_lat, gps_lng, reactor_make, reactor_type, nameplate_tpd, scales_note, lab_partner) VALUES
      ($1, $2, 'Nyota Plant 1', -0.30, 36.08, 'Demo kiln works', 'continuous-feed pyrolysis', 10,
-      'No on-site weighbridge; loading-hopper and silo scales in use, slips from the nearby weighbridge photographed at the gate.',
+      'No on-site weighbridge. Loading-hopper and silo scales in use, with slips from the nearby weighbridge photographed at the gate.',
       'ISO/IEC 17025 accredited laboratory (demo)')`,
     [DEMO.facilityId, DEMO.projectId]
   )
 
   await pool.query(
     `INSERT INTO sources (id, project_id, kind, title, ref, note) VALUES
-     ('src-slip-001', $1, 'weighbridge-slip', 'Weighbridge slip 4411 (demo)', 'slips/4411.jpg', 'Nearby legal-for-trade weighbridge; slip photographed at gate'),
+     ('src-slip-001', $1, 'weighbridge-slip', 'Weighbridge slip 4411 (demo)', 'slips/4411.jpg', 'Nearby legal-for-trade weighbridge, slip photographed at the gate'),
      ('src-hopper-cal', $1, 'calibration', 'Hopper and silo scale calibration record (demo)', 'cal/scales-2026.pdf', 'Calibration certificates for the loading hopper and biochar silo scales'),
      ('src-cert-ht02', $1, 'lab-certificate', 'Trial batch HT-02 lab certificate (demo)', 'lab/HT-02.pdf', 'Ultimate analysis: Corg, H/Corg, O/Corg, moisture'),
-     ('src-decay-photos', $1, 'counterfactual', 'Residue heaps photo series, supplier yards (demo)', 'photos/decay-set-1/', 'Maize cobs with no commercial use, left to decay; basis of the CC3 argument'),
+     ('src-decay-photos', $1, 'counterfactual', 'Residue heaps photo series, supplier yards (demo)', 'photos/decay-set-1/', 'Maize cobs with no commercial use, left to decay. The basis of the CC3 argument'),
      ('src-telemetry-ht02', $1, 'telemetry-export', 'Reactor temperature export, run HT-02 (demo)', 'telemetry/HT-02.csv', 'PLC export, 1-minute aggregation'),
      ('src-app-photos', $1, 'application-evidence', 'Application day photo set (demo)', 'photos/app-01/', 'Geo-tagged application photos and farmer attestation')`,
     [DEMO.projectId]
@@ -80,9 +80,9 @@ async function seed() {
 
   await pool.query(
     `INSERT INTO suppliers (id, project_id, name, village, category, lat, lng) VALUES
-     ('SUP-1', $1, 'Bahati Farmers Cooperative (demo)', 'Bahati', 'crop-residue', -0.15, 36.15),
-     ('SUP-2', $1, 'Rongai Maize Growers (demo)', 'Rongai', 'crop-residue', -0.17, 35.86),
-     ('SUP-3', $1, 'Subukia Village Cluster (demo)', 'Subukia', 'crop-residue', 0.00, 36.23)`,
+     ('SUP-1', $1, 'Bahati Farmers Co-op', 'Bahati', 'crop-residue', -0.15, 36.15),
+     ('SUP-2', $1, 'Rongai Maize Growers', 'Rongai', 'crop-residue', -0.17, 35.86),
+     ('SUP-3', $1, 'Subukia Village Cluster', 'Subukia', 'crop-residue', 0.00, 36.23)`,
     [DEMO.projectId]
   )
 
@@ -92,7 +92,7 @@ async function seed() {
     { id: 'CN-003', supplier: 'SUP-3', est: 395, moisture: 0.25, days: 15, lot: 'L-02' },
     { id: 'CN-004', supplier: 'SUP-1', est: 440, moisture: 0.21, days: 12, lot: 'L-02' },
     { id: 'CN-005', supplier: 'SUP-2', est: 405, moisture: 0.23, days: 9, lot: 'L-03' },
-    { id: 'CN-PENDING', supplier: 'SUP-1', est: 410, moisture: 0.22, days: 1, lot: null },
+    { id: 'CN-006', supplier: 'SUP-1', est: 410, moisture: 0.22, days: 1, lot: null },
   ]
   await appendEvents(
     DEMO.projectId,
@@ -130,7 +130,7 @@ async function seed() {
 
   await pool.query(
     `INSERT INTO batches (id, project_id, facility_id, code, status, opened_at, closed_at, feedstock_mass_kg, biochar_wet_kg, biochar_moisture_frac, duration_min, gps_lat, gps_lng, notes) VALUES
-     ('bat-ht02', $1, $2, 'HT-02', 'sampled', $3, $4, 4800, 1250, 0.18, 180, -0.30, 36.08, 'Hot trial 2: stability check run; full sampling and lab analysis'),
+     ('bat-ht02', $1, $2, 'HT-02', 'sampled', $3, $4, 4800, 1250, 0.18, 180, -0.30, 36.08, 'Hot trial 2: stability check, fully sampled and analysed'),
      ('bat-ht03', $1, $2, 'HT-03', 'awaiting-lab', $5, $6, 4200, 1100, 0.19, 165, -0.30, 36.08, 'Hot trial 3: samples dispatched to the lab'),
      ('bat-ht01', $1, $2, 'HT-01', 'open', $7, NULL, 1900, NULL, NULL, NULL, -0.30, 36.08, 'Continuous-feed shakedown run in progress')`,
     [DEMO.projectId, DEMO.facilityId, iso(20), iso(6), iso(10), iso(3), iso(2)]
