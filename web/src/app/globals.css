@@ -146,6 +146,18 @@ body {
 .chart--compact text {
   font-size: 15px; /* small viewBox (360): keeps rendered text at 13px+ */
 }
+.chart .guide {
+  stroke: var(--ink-faint);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+.chart text.axis-title {
+  font-family: var(--sans);
+  fill: var(--ink-faint);
+}
+.chart text.callout-ink {
+  fill: var(--ink);
+}
 .chart-tip {
   position: absolute;
   pointer-events: none;
@@ -259,12 +271,37 @@ body {
 }
 .field-form {
   display: grid;
-  gap: var(--sp-4);
+  gap: var(--sp-5);
   align-content: start;
 }
-.field-form .ui-input,
-.field-form select.ui-input {
-  min-height: var(--control-h-lg);
+/* A label belongs to its field: close to it, and well clear of the next. */
+.field-group {
+  display: grid;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.field-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+}
+.field-form .ui-input {
+  min-height: 48px; /* a gloved thumb at the gate */
+}
+.field-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+}
+.field-actions .ui-btn {
+  min-height: 48px;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.field-actions .ui-btn svg {
+  flex: none;
+  color: var(--ink-muted);
 }
 .net-dot {
   width: 8px;
@@ -284,15 +321,58 @@ body {
   background: var(--surface);
   border: var(--border) solid var(--hairline);
   border-radius: var(--radius);
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-3);
   display: grid;
-  gap: var(--sp-1);
+  grid-template-columns: 64px 1fr;
+  gap: var(--sp-3);
+  align-items: start;
+}
+.outbox-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  display: block;
+  border: var(--border) solid var(--hairline);
+}
+.outbox-thumb--empty {
+  background: var(--surface-sunken);
+}
+.outbox-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.outbox-body b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 .outbox-item .row {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: var(--sp-3);
+  min-width: 0;
+}
+.outbox-meta {
+  font-size: var(--t-ui-sm);
+  color: var(--ink-muted);
+}
+.outbox-flags {
+  display: inline-flex;
+  gap: var(--sp-3);
+  font-size: var(--t-caption);
+  color: var(--ink-muted);
+}
+.outbox-flags > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.outbox-flags > span[data-on='false'] {
+  color: var(--caution-ink);
 }
 .outbox-item .mono {
   font-family: var(--mono);
@@ -430,4 +510,47 @@ body {
   margin: var(--sp-3) 0 0;
   font-size: var(--t-ui-sm);
   color: var(--ink-muted);
+}
+
+/* The attached photo, stamped with where and when, like a field camera. */
+.field-photo {
+  position: relative;
+  margin: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: var(--border) solid var(--hairline);
+}
+.field-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 62%;
+  display: block;
+}
+.field-photo figcaption {
+  position: absolute;
+  left: var(--sp-2);
+  bottom: var(--sp-2);
+  padding: 2px var(--sp-2);
+  border-radius: 999px;
+  background: rgb(0 0 0 / 0.58);
+  color: #fff;
+  font-size: var(--t-caption);
+  letter-spacing: 0.02em;
+}
+
+/* Requirement IDs never break at their hyphens. */
+.req-id {
+  white-space: nowrap;
+  font-family: var(--mono);
+}
+
+/* Both requirement tables share one grid, so their columns line up. */
+.compliance-table {
+  table-layout: fixed;
+  width: 100%;
+}
+.compliance-table td {
+  overflow-wrap: anywhere;
 }

@@ -9,9 +9,16 @@
  * the evidence reference, not the pixels.
  */
 import { useEffect, useRef, useState } from 'react'
-import { Badge, Button, Logo } from '@/design'
+import { Badge, Button, IconCamera, IconPin, Logo } from '@/design'
 
 type Supplier = { id: string; name: string }
+
+const MATERIAL: Record<string, string> = {
+  'crop-residue': 'Crop residue',
+  'forestry-residue': 'Forestry residue',
+  'processing-offcut': 'Processing offcut',
+  'agri-residue': 'Agri-residue',
+}
 type OutboxRecord = {
   id: string
   kind: 'consignment-captured'
@@ -49,7 +56,7 @@ function save(key: string, value: unknown) {
   }
 }
 
-async function compressImage(file: File, maxEdge = 1000, quality = 0.72): Promise<string> {
+async function compressImage(file: File, maxEdge = 1600, quality = 0.8): Promise<string> {
   const url = URL.createObjectURL(file)
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -83,6 +90,8 @@ export default function FieldApp() {
   const [outbox, setOutbox] = useState<OutboxRecord[]>([])
   const [online, setOnline] = useState(true)
   const [gps, setGps] = useState<{ lat: number; lng: number } | null>(null)
+  const [gpsError, setGpsError] = useState<string | null>(null)
+  const [locating, setLocating] = useState(false)
   const [photo, setPhoto] = useState<string | null>(null)
   const [syncing, setSyncing] = useState(false)
   const [syncError, setSyncError] = useState<string | null>(null)
@@ -209,7 +218,7 @@ export default function FieldApp() {
       setOutbox([])
       save(OUTBOX_KEY, [])
     } catch {
-      setSyncError('Sync did not go through. The records are safe here; try again at the plant.')
+      setSyncError('Sync did not go through. The records are safe on this phone. Try again at the plant.')
     } finally {
       setSyncing(false)
     }
@@ -239,6 +248,7 @@ export default function FieldApp() {
             capture(e.currentTarget)
           }}
         >
+          <div className="field-group">
           <label className="ui-label" htmlFor="supplier">
             Supplier
           </label>
@@ -249,9 +259,12 @@ export default function FieldApp() {
               </option>
             ))}
           </select>
+          </div>
 
+          <div className="field-pair">
+          <div className="field-group">
           <label className="ui-label" htmlFor="mass">
-            Estimated mass (kg)
+            Mass (kg)
           </label>
           <input
             id="mass"
@@ -264,7 +277,9 @@ export default function FieldApp() {
             className="ui-input"
             data-testid="field-mass"
           />
+          </div>
 
+          <div className="field-group">
           <label className="ui-label" htmlFor="moisture">
             Moisture (%)
           </label>
@@ -280,7 +295,10 @@ export default function FieldApp() {
             className="ui-input"
             data-testid="field-moisture"
           />
+          </div>
+          </div>
 
+          <div className="field-group">
           <label className="ui-label" htmlFor="category">
             Material
           </label>
@@ -290,6 +308,7 @@ export default function FieldApp() {
             <option value="processing-offcut">Processing-unit offcut</option>
             <option value="agri-residue">Other agri-residue</option>
           </select>
+          </div>
 
           <input
             ref={photoInput}
@@ -309,34 +328,58 @@ export default function FieldApp() {
               e.target.value = ''
             }}
           />
-          <div style={{ display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap' }}>
+          <div className="field-actions">
             <Button
               type="button"
               variant="outline"
               data-testid="field-gps"
+              disabled={locating}
               onClick={() => {
-                const fallback = { lat: 20.9, lng: 79.4 }
-                if (!('geolocation' in navigator)) return setGps(fallback)
+                // A position is evidence: never fill one in. Without a fix the
+                // capture goes ahead with no GPS and says so.
+                setGpsError(null)
+                if (!('geolocation' in navigator)) return setGpsError('This phone cannot report its location.')
+                setLocating(true)
                 navigator.geolocation.getCurrentPosition(
-                  (p) => setGps({ lat: p.coords.latitude, lng: p.coords.longitude }),
-                  () => setGps(fallback),
-                  { timeout: 3000 }
+                  (p) => {
+                    setLocating(false)
+                    setGps({ lat: p.coords.latitude, lng: p.coords.longitude })
+                  },
+                  () => {
+                    setLocating(false)
+                    setGpsError('No GPS fix. Allow location access, step into the open and try again.')
+                  },
+                  { timeout: 10000, enableHighAccuracy: true }
                 )
               }}
             >
-              {gps ? 'GPS pinned' : 'Pin GPS'}
+              <IconPin />
+              {locating ? 'Locating…' : gps ? 'GPS fixed' : 'Pin GPS'}
             </Button>
             <Button type="button" variant="outline" data-testid="field-photo" onClick={() => photoInput.current?.click()}>
-              {photo ? 'Photo attached' : 'Take photo'}
+              <IconCamera />
+              {photo ? 'Retake photo' : 'Take photo'}
             </Button>
           </div>
+          {gps && !photo && (
+            <p className="mono muted" data-testid="field-gps-fix" style={{ margin: 0, fontSize: 'var(--t-caption)' }}>
+              Fixed at {gps.lat.toFixed(4)}, {gps.lng.toFixed(4)}
+            </p>
+          )}
+          {gpsError && (
+            <p className="muted" data-testid="field-gps-error" style={{ margin: 0, fontSize: 'var(--t-ui-sm)' }}>
+              {gpsError}
+            </p>
+          )}
           {photo && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={photo}
-              alt="Consignment, about to be captured"
-              style={{ maxWidth: 160, borderRadius: 'var(--radius-sm)', border: 'var(--border) solid var(--hairline)' }}
-            />
+            <figure className="field-photo" data-testid="field-photo-preview">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photo} alt="Consignment, about to be captured" />
+              <figcaption className="mono">
+                {gps ? `${gps.lat.toFixed(4)}, ${gps.lng.toFixed(4)}` : 'No GPS yet'} ·{' '}
+                {new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+              </figcaption>
+            </figure>
           )}
 
           <Button type="submit" variant="solid" size="lg" data-testid="field-capture">
@@ -369,23 +412,37 @@ export default function FieldApp() {
           ) : (
             outbox.map((e) => (
               <article className="outbox-item" data-testid="outbox-item" key={e.id}>
-                <div className="row">
-                  <b>{e.payload.supplierName}</b>
-                  <Badge tone="caution" variant="dashed" data-testid="outbox-state">
-                    Sync pending
-                  </Badge>
-                </div>
-                <div className="row">
-                  <span className="mono">
-                    {Math.round(e.payload.estMassKg)} kg · {e.payload.category}
+                {e.photoData ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img className="outbox-thumb" src={e.photoData} alt="" />
+                ) : (
+                  <span className="outbox-thumb outbox-thumb--empty" aria-hidden="true" />
+                )}
+                <div className="outbox-body">
+                  <div className="row">
+                    <b>{e.payload.supplierName}</b>
+                    <span className="mono" data-testid="field-timestamp">
+                      {new Date(e.capturedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <span className="outbox-meta">
+                    <span className="mono">{Math.round(e.payload.estMassKg)} kg</span> ·{' '}
+                    {MATERIAL[e.payload.category] ?? e.payload.category}
                   </span>
-                  <span className="mono" data-testid="field-timestamp">
-                    {new Date(e.capturedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                  <div className="row">
+                    <span className="outbox-flags">
+                      <span data-on={!!e.payload.gps}>
+                        <IconPin size={14} /> {e.payload.gps ? 'GPS' : 'No GPS'}
+                      </span>
+                      <span data-on={!!e.photoData}>
+                        <IconCamera size={14} /> {e.photoData ? 'Photo' : 'No photo'}
+                      </span>
+                    </span>
+                    <Badge tone="caution" variant="dashed" data-testid="outbox-state">
+                      Sync pending
+                    </Badge>
+                  </div>
                 </div>
-                <span className="mono muted" style={{ fontSize: 'var(--t-caption)' }}>
-                  {e.payload.gps ? 'GPS recorded' : 'No GPS'} · {e.photoData ? 'Photo held locally' : 'No photo'}
-                </span>
               </article>
             ))
           )}

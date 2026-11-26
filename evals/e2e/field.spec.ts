@@ -22,16 +22,20 @@ test('W1 capture offline with a photo, survive reload, sync when back online', a
   await page.getByTestId('field-mass').fill('412')
   await page.getByTestId('field-moisture').fill('21')
   await page.getByTestId('field-category').selectOption('crop-residue')
+  await context.grantPermissions(['geolocation'])
+  await context.setGeolocation({ latitude: -0.2, longitude: 36.1 })
   await page.getByTestId('field-gps').click()
+  await expect(page.getByTestId('field-gps')).toContainText('GPS fixed')
+  await expect(page.getByTestId('field-gps-fix')).toContainText('-0.2000, 36.1000')
   await page.getByTestId('field-photo-input').setInputFiles({ name: 'pile.png', mimeType: 'image/png', buffer: PIXEL })
-  await expect(page.getByTestId('field-photo')).toContainText('Photo attached')
+  await expect(page.getByTestId('field-photo')).toContainText('Retake photo')
   await page.getByTestId('field-capture').click()
 
   const item = page.getByTestId('outbox-item').first()
   await expect(item).toBeVisible()
   await expect(item.getByTestId('outbox-state')).toHaveText(/sync pending/i)
   await expect(item.getByTestId('field-timestamp')).toHaveText(/\d{2}:\d{2}/)
-  await expect(item).toContainText('Photo held locally')
+  await expect(item).toContainText('Photo')
 
   // R-8W08-0: the record survives an offline reload.
   await page.reload({ waitUntil: 'domcontentloaded' }).catch(() => undefined)
