@@ -6,6 +6,7 @@ import { statusLabel } from '@/lib/labels'
 import { AttachLot } from './attach-lot'
 import { NewLot } from './new-lot'
 import { NotDuplicate } from './duplicates'
+import { Km } from '../distance'
 
 export default async function Gate() {
   const [consignments, lots, batches, dupes] = await Promise.all([
@@ -63,6 +64,7 @@ export default async function Gate() {
                   <th scope="col">Supplier</th>
                   <th scope="col" data-numeric>Field estimate</th>
                   <th scope="col" data-numeric>Moisture</th>
+                  <th scope="col" data-numeric>To plant</th>
                   <th scope="col">Captured</th>
                   <th scope="col">State</th>
                 </tr>
@@ -84,6 +86,9 @@ export default async function Gate() {
                     <td>{c.supplierName}</td>
                     <td data-numeric>{fmtKg(c.estMassKg)}</td>
                     <td data-numeric>{c.moistureFrac === null ? '–' : `${(c.moistureFrac * 100).toFixed(0)}%`}</td>
+                    <td data-numeric>
+                      <Km d={c.distance} />
+                    </td>
                     <td>{fmtDate(c.capturedAt)}</td>
                     <td>
                       {c.state === 'received' ? (

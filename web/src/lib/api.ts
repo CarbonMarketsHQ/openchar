@@ -181,9 +181,12 @@ export type Summary = {
   updatedAt: string
 }
 
+export type Distance = { km: number | null; source: 'recorded' | 'estimate' | null }
+
 export type Consignment = {
   id: string
   supplierName: string
+  distance?: Distance
   estMassKg: number
   moistureFrac: number | null
   category: string
