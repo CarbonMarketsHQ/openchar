@@ -17,14 +17,17 @@ import {
   UploadTelemetry,
 } from './actions'
 import { TempChart } from './temp-chart'
+import { AddDocument } from '../../documents/add-document'
+import { DocumentList, type Doc } from '../../documents/document-list'
 
 const STATUS_TONE = { open: 'info', sampled: 'positive', 'awaiting-lab': 'caution', closed: 'neutral' } as const
 
 export default async function BatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [batch, units] = await Promise.all([
+  const [batch, units, docs] = await Promise.all([
     api<BatchDetail>(`/batches/${encodeURIComponent(id)}`),
     api<UnitRow[]>(`/units?batch=${encodeURIComponent(id)}`),
+    api<{ documents: Doc[] }>(`/documents?record=${encodeURIComponent(`batch:${id}`)}`),
   ])
   if (batch === null) {
     const health = await api<{ ok: boolean }>('/health')
@@ -193,6 +196,26 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
                 ))}
               </div>
             )}
+          </CardBody>
+        </Card>
+        <Card data-testid="batch-documents">
+          <CardHead>
+            <CardTitle desc="Certificates, slips, invoices and the rest attached to this batch.">Documents</CardTitle>
+          </CardHead>
+          <CardBody>
+            {docs && docs.documents.length > 0 ? (
+              <DocumentList docs={docs.documents} />
+            ) : (
+              <p className="muted" style={{ margin: 0 }}>
+                Nothing attached yet.
+              </p>
+            )}
+            <div style={{ marginTop: 'var(--sp-4)', display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap', alignItems: 'center' }}>
+              <AddDocument fixed={{ kind: 'batch', id: batch.id }} defaultType="lab-certificate" variant="outline" />
+              <Link href={`/console/documents?record=${encodeURIComponent(`batch:${batch.id}`)}`} style={{ fontSize: 'var(--t-ui-sm)' }}>
+                All documents
+              </Link>
+            </div>
           </CardBody>
         </Card>
         <Card>

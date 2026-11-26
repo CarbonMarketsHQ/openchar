@@ -20,7 +20,7 @@ export default async function Facilities() {
       ) : (
         <div style={{ display: 'grid', gap: 'var(--sp-5)', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
           {facilities.map((f) => (
-            <Card key={f.id} data-testid="facility-card">
+            <Card key={f.id} id={`facility-${f.id}`} data-testid="facility-card">
               <CardHead>
                 <CardTitle desc={f.reactorMake ? `${f.reactorMake}${f.reactorType ? `, ${f.reactorType}` : ''}` : undefined}>
                   {f.name}

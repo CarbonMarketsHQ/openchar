@@ -48,7 +48,7 @@ export default async function Gate() {
               </thead>
               <tbody>
                 {consignments.map((c) => (
-                  <tr key={c.id} data-testid="consignment-row">
+                  <tr key={c.id} id={`consignment-${c.id}`} data-testid="consignment-row">
                     <td className="mono">{c.id}</td>
                     <td>{c.supplierName}</td>
                     <td data-numeric>{fmtKg(c.estMassKg)}</td>
@@ -77,7 +77,7 @@ export default async function Gate() {
           {[...lots].reverse().map((l) => {
             const delta = l.weighbridgeSlipKg === null ? null : l.hopperMassKg - l.weighbridgeSlipKg
             return (
-              <div className="stat" data-testid="lot-card" key={l.id}>
+              <div className="stat" data-testid="lot-card" key={l.id} id={`lot-${l.id}`}>
                 <span className="k" data-stamp>{l.id}</span>
                 <span className="v" data-testid="lot-hopper-mass">
                   {Math.round(l.hopperMassKg)}
