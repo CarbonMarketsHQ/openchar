@@ -56,6 +56,22 @@ export const IconX = (p: IconProps) => (
   </Icon>
 )
 
+/** A location pin: the field app's GPS fix. */
+export const IconPin = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M8 14.5s4.5-4.2 4.5-7.75a4.5 4.5 0 0 0-9 0C3.5 10.3 8 14.5 8 14.5Z" />
+    <circle cx="8" cy="6.75" r="1.5" />
+  </Icon>
+)
+
+/** A camera: taking an evidence photo. */
+export const IconCamera = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M2 5.25h3l1.25-2h3.5l1.25 2h3v8H2z" />
+    <circle cx="8" cy="9" r="2.25" />
+  </Icon>
+)
+
 export const IconChevronDown = (p: IconProps) => (
   <Icon {...p}>
     <path d="M3.5 6 8 10.5 12.5 6" />

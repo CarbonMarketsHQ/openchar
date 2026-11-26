@@ -493,6 +493,22 @@
 
 /* =============================================================== select == */
 
+/* A native <select> styled as a field: the browser's own arrow sits on the
+ * border and its text indent differs from an input's, so both are replaced.
+ * The arrow is the set's ChevronDown, inset by the same space as the text. */
+.cmhq select.ui-input {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-inline: var(--sp-3) calc(var(--sp-3) + 16px + var(--sp-2));
+  background-image: var(--chevron);
+  background-repeat: no-repeat;
+  background-position: right var(--sp-3) center;
+  background-size: 16px 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
 .cmhq .ui-select {
   display: inline-flex;
   align-items: center;
@@ -1213,8 +1229,10 @@
 /* figures line up on the decimal or they are not figures */
 .cmhq .ui-table :is(th, td)[data-numeric] {
   text-align: right;
-  font-family: var(--mono);
   font-variant-numeric: tabular-nums slashed-zero;
+}
+.cmhq .ui-table td[data-numeric] {
+  font-family: var(--mono);
 }
 
 /* A caption is a sentence describing the table, so it sets as one. The mono
