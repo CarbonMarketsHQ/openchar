@@ -73,7 +73,7 @@ async function main() {
 }
 
 main().catch(async (err) => {
-  console.error(err instanceof Error && !process.env.DEBUG ? `error: ${err.message}` : err)
+  console.error(err instanceof Error ? `error: ${err.message}` : err)
   process.exitCode = 1
   await pool.end().catch(() => {})
 })
