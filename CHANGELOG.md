@@ -4,6 +4,12 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Storage
+- A Storage page lists each location (silo, shed, yard or customer site) with the units stored there and their total mass. Units can be placed at a location when they are created.
+- Moving a unit between locations or returning a delivered unit to storage adds an event to its custody chain.
+- A stock count records the labels found at a location. It shows which units are missing and which are unexpected.
+- Tests: STO1 in `evals/e2e/storage.spec.ts`.
+
 ### Carbon sink register
 - Every biochar application now records its sink: soil, compost, animal feed, concrete, asphalt, filtration or other. Both the field app and the console ask for the sink, and you can correct it later in the register.
 - A new Carbon sinks page shows total applied biochar by sink. This version of the ledger credits storage in soil only. Biochar in other sinks is recorded with the same evidence and marked as not credited, with the reason shown.

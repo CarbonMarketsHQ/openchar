@@ -16,8 +16,7 @@ works.
 
 - Drawing a field boundary on a map in the field app, next to walking it.
 - Accounting for sinks other than soil (concrete, asphalt, filtration and others), under each registry's rules. They are recorded today and not credited.
-- Storage locations, with stock per location, transfers between locations,
-  periodic stock counts, returned deliveries and planned deliveries.
+- Planned deliveries, scheduled ahead against the stock they will draw on.
 
 ## Registries and credits
 
