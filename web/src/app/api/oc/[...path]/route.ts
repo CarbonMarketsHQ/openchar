@@ -21,8 +21,10 @@ async function forward(req: NextRequest, { params }: { params: Promise<{ path: s
   }).catch(() => null)
   if (!upstream) return NextResponse.json({ error: 'the data service is unreachable' }, { status: 502 })
   const resHeaders = new Headers()
-  const upstreamType = upstream.headers.get('content-type')
-  if (upstreamType) resHeaders.set('content-type', upstreamType)
+  for (const h of ['content-type', 'content-disposition', 'content-length']) {
+    const v = upstream.headers.get(h)
+    if (v) resHeaders.set(h, v)
+  }
   return new NextResponse(upstream.body, { status: upstream.status, headers: resHeaders })
 }
 

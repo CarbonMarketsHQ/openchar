@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Card, CardBody, CardHead, CardTitle, Field, Input, Notice } from '@/design'
+import { Button, Card, CardBody, CardHead, CardTitle, Field, Input, LinkButton, Notice } from '@/design'
 import { oc } from '@/lib/client'
 import { FormDialog } from '../form-dialog'
 import { statusLabel } from '@/lib/labels'
@@ -80,6 +80,42 @@ function SecurityEvents() {
               <span className="mono muted">{e.ip ?? ''}</span>
             </div>
           ))}
+        </div>
+      </CardBody>
+    </Card>
+  )
+}
+
+/** A full copy of the workspace, for admins: every table and every file. */
+function YourData() {
+  const [isAdmin, setIsAdmin] = useState(false)
+  useEffect(() => {
+    void oc('/auth/users').then((r) => r.ok && setIsAdmin(true))
+  }, [])
+  if (!isAdmin) return null
+  return (
+    <Card style={{ maxWidth: 560 }} data-testid="export-card">
+      <CardHead>
+        <CardTitle desc="Every table and every uploaded file in this workspace, in one ZIP file. Passwords are not included.">
+          Your data
+        </CardTitle>
+      </CardHead>
+      <CardBody>
+        <div style={{ display: 'grid', gap: 'var(--sp-4)', justifyItems: 'start' }}>
+          <p style={{ margin: 0 }}>
+            The tables open in any spreadsheet, and the whole copy loads into another OpenChar server, such as
+            your own.
+          </p>
+          <LinkButton href="/api/oc/export/workspace" download variant="outline" data-testid="export-workspace">
+            Download a full copy
+          </LinkButton>
+          <p className="muted" style={{ margin: 0, fontSize: 'var(--t-ui-sm)' }}>
+            Moving to your own server?{' '}
+            <a href="https://github.com/CarbonMarketsHQ/openchar/blob/main/docs/self-hosting.md#move-a-workspace-to-another-server">
+              Load the copy with one command
+            </a>
+            .
+          </p>
         </div>
       </CardBody>
     </Card>
@@ -221,6 +257,7 @@ export default function Account() {
         </CardBody>
       </Card>
       <Team />
+      <YourData />
       <Backups />
       <SecurityEvents />
     </>
