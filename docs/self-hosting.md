@@ -161,3 +161,16 @@ database) and `openchar-files` (the evidence files) in the compose file. The
 backup files above are a complete, portable copy: a standard Postgres dump and
 an archive of the files. The reactor readings of any batch also download from
 the batch page in the registry's Parquet format or as JSON.
+
+## Move a workspace to another server
+
+A workspace admin can download a full copy of the workspace from the Account page, under Your data. The ZIP file contains every table (as JSON and CSV) and every uploaded file. It does not include passwords, sign-in sessions or the sign-in log. You can also download this copy from a workspace on the hosted service at openchar.carbonmarketshq.com.
+
+To load the ZIP file into your own server, copy it into the `api` container and import it:
+
+```bash
+docker compose cp openchar-copy.zip api:/tmp/copy.zip
+docker compose exec api npm run admin -- import-workspace /tmp/copy.zip
+```
+
+The import checks every file against its SHA-256 hash and verifies the hash chain of the field app records. It stops without writing anything if the workspace already exists on the server, or if anyone in it already has an account. When it finishes, it prints a link for each person to set a new password. The links expire after seven days.

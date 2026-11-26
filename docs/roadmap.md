@@ -63,7 +63,6 @@ works.
 - CSV and Excel import and export for every table.
 - Exports for accounting software such as Tally and Zoho Books.
 - A published API reference.
-- A self-serve export of the whole workspace: every table and every file.
 
 ## Accounts
 
