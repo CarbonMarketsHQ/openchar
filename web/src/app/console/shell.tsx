@@ -12,6 +12,7 @@ import {
   IconKiln,
   IconBalance,
   IconBars,
+  IconFile,
   IconFuel,
   IconLayers,
   IconLog,
@@ -51,6 +52,7 @@ const NAV = [
 ]
 
 const REPORTING = [
+  { href: '/console/reports', label: 'Reports', icon: <IconFile /> },
   { href: '/console/trends', label: 'Trends', icon: <IconTrend /> },
   { href: '/console/emissions', label: 'Emissions', icon: <IconBars /> },
   { href: '/console/compliance', label: 'Compliance', icon: <IconBook /> },

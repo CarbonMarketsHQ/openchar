@@ -470,6 +470,9 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
         <LinkButton href="/console/lab" variant="outline">
           Lab results
         </LinkButton>
+        <LinkButton href={`/console/reports/batch/${batch.id}`} variant="outline" data-testid="batch-report-link">
+          Batch report
+        </LinkButton>
       </div>
       <p className="muted" style={{ margin: 0, fontSize: 'var(--t-caption)' }}>
         Opened {fmtDate(batch.openedAt)}, {batch.closedAt ? `closed ${fmtDate(batch.closedAt)}` : 'still open'}
