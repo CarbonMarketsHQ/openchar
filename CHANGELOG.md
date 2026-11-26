@@ -4,6 +4,12 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Carbon sink register
+- Every biochar application now records its sink: soil, compost, animal feed, concrete, asphalt, filtration or other. Both the field app and the console ask for the sink, and you can correct it later in the register.
+- A new Carbon sinks page shows total applied biochar by sink. This version of the ledger credits storage in soil only. Biochar in other sinks is recorded with the same evidence and marked as not credited, with the reason shown.
+- The Compliance page shows a warning when biochar is applied to a sink that the ledger does not credit.
+- Tests: SNK1 in `evals/e2e/sinks.spec.ts`.
+
 ### Soil application in the field app
 - The field app now has a second mode, Soil application, for the person spreading the biochar. It records the dispatch the biochar came from, the farm, the mass applied, a GPS point, up to four photos and an optional short video.
 - Walking around the field with the phone records its boundary, and the app calculates the area. The area can also be typed in.

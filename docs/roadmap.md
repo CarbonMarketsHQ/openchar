@@ -15,8 +15,7 @@ works.
 ## End use and carbon sinks
 
 - Drawing a field boundary on a map in the field app, next to walking it.
-- A register of carbon sinks by type (soil, concrete, filtration and other
-  uses), each with its own accounting under the registry's rules.
+- Accounting for sinks other than soil (concrete, asphalt, filtration and others), under each registry's rules. They are recorded today and not credited.
 - Storage locations, with stock per location, transfers between locations,
   periodic stock counts, returned deliveries and planned deliveries.
 
