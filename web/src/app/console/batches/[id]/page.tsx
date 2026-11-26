@@ -24,11 +24,15 @@ const STATUS_TONE = { open: 'info', sampled: 'positive', 'awaiting-lab': 'cautio
 
 export default async function BatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [batch, units, docs] = await Promise.all([
+  const [batch, units, docs, shiftLog] = await Promise.all([
     api<BatchDetail>(`/batches/${encodeURIComponent(id)}`),
     api<UnitRow[]>(`/units?batch=${encodeURIComponent(id)}`),
     api<{ documents: Doc[] }>(`/documents?record=${encodeURIComponent(`batch:${id}`)}`),
+    api<{ shifts: { operator: string; batches: string[] }[] }>('/shifts?limit=200'),
   ])
+  const operators = [
+    ...new Set((shiftLog?.shifts ?? []).filter((s) => s.batches.includes(id)).map((s) => s.operator)),
+  ]
   if (batch === null) {
     const health = await api<{ ok: boolean }>('/health')
     if (!health) return <ApiDown />
@@ -272,6 +276,14 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
         Opened {fmtDate(batch.openedAt)}, {batch.closedAt ? `closed ${fmtDate(batch.closedAt)}` : 'still open'}
         {batch.gps ? ' · reactor GPS on file (G-1CDW-0)' : ' · no reactor GPS yet'}
         {batch.ops ? ` · run inputs on file` : ' · run inputs missing for the ledger'}
+        {operators.length > 0 && (
+          <>
+            {' · run by '}
+            <Link href="/console/shifts" data-testid="batch-operators">
+              {operators.join(', ')}
+            </Link>
+          </>
+        )}
       </p>
     </>
   )
