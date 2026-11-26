@@ -4,6 +4,12 @@ Changes to OpenChar, newest first. Each feature lists the automated tests that c
 
 ## Unreleased
 
+### Bio-liquid containers
+- Co-products on a batch page can be packaged into drums, IBC totes, tanks or jerrycans. Each container is a unit with its own QR label and follows the same chain of custody as biochar bags: splitting, merging, delivery and use.
+- Total packaged mass cannot exceed a co-product's declared mass, and biochar and bio-liquid cannot be merged into one unit.
+- A container page shows what it holds (for example, bio-liquid grade 2 for wood vinegar) and which batch it came from.
+- Tests: UN2 in `evals/e2e/units.spec.ts`.
+
 ### Mass and carbon balance
 - Each batch page compares feedstock against measured outputs: biochar sent to the silo, biochar sent to other lines, and bio-liquids. Gas and water vapour make up the remainder unless gas is weighed.
 - Checks flag measured outputs heavier than the feedstock and dry biochar yields below 15% or above 45%. When gas is weighed, checks also flag more than a 5% difference between feedstock and measured outputs.
