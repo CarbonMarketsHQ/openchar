@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="docs/media/banner.png" alt="OpenChar: free and open source biochar dMRV platform" width="100%" />
+  <img src="docs/media/banner.jpg" alt="OpenChar, the free and open source biochar dMRV platform: the carbon ledger for a production batch, beside the field app capturing a consignment offline" width="100%" />
 </p>
-
-<p align="center"><b>Free and open source Biochar dMRV Platform</b></p>
 
 <p align="center">
   <a href="https://openchar.carbonmarketshq.com">Hosted version</a> ·
@@ -19,18 +17,14 @@ run this digital monitoring, reporting and verification (dMRV) software on
 their own server, read every line of the carbon calculation, and keep a full
 copy of their data.
 
-<p align="center">
-  <img src="docs/media/batch-dark.png" alt="A production batch: feedstock in, biochar out, yield, and the reactor temperature with a flagged drop below 400 °C" width="100%" />
-</p>
-
 <table>
   <tr>
-    <td width="68%"><img src="docs/media/ledger-dark.png" alt="The carbon ledger for one batch: gross stored CO2e, durable fraction, deductions and the conservative result, each line traceable to its evidence" /></td>
-    <td width="32%"><img src="docs/media/field-app.png" alt="The offline field app capturing a feedstock consignment on a phone" /></td>
+    <td width="50%"><img src="docs/media/panel-field.jpg" alt="The field app on two phones: a consignment being captured with a GPS fix and a stamped photo, and three captures waiting to sync" /></td>
+    <td width="50%"><img src="docs/media/panel-ledger.jpg" alt="The carbon ledger for one batch: gross stored CO2e, durable fraction, deductions and the conservative result, each line traceable to its evidence" /></td>
   </tr>
   <tr>
-    <td>The ledger: every line opens to the records it used.</td>
-    <td>The field app works offline and syncs later.</td>
+    <td width="50%"><img src="docs/media/panel-batch.jpg" alt="A production batch with its reactor temperature over three hours and a flagged drop below 400 °C" /></td>
+    <td width="50%"><img src="docs/media/panel-compliance.jpg" alt="The compliance view: each Isometric requirement with its state and where it stands" /></td>
   </tr>
 </table>
 
