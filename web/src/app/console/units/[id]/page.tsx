@@ -9,6 +9,8 @@ import { UnitQr } from './qr'
 type Unit = {
   id: string
   kind: string
+  material: string
+  coProduct: { id: string; grade: string; fate: string } | null
   massKg: number
   status: string
   originBatch: string | null
@@ -22,6 +24,7 @@ type Unit = {
 function eventDetail(kind: string, d: Record<string, unknown>): string {
   const kg = typeof d.massKg === 'number' ? fmtKg(d.massKg) : null
   const list = (v: unknown) => (Array.isArray(v) ? v.join(', ') : String(v))
+  if (kind === 'created' && d.coProduct) return `${kg} of ${d.coProduct} from batch ${d.fromBatch}`
   if (kind === 'created' && d.fromBatch) return `${kg} from batch ${d.fromBatch}`
   if (kind === 'created' && d.splitFrom) return `${kg} split from ${d.splitFrom}`
   if (kind === 'created' && d.mergedFrom) return `${kg} merged from ${list(d.mergedFrom)}`
@@ -70,13 +73,25 @@ export default async function UnitPage({ params }: { params: Promise<{ id: strin
       <div style={{ display: 'grid', gap: 'var(--sp-5)', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', alignItems: 'start' }}>
         <Card>
           <CardHead>
-            <CardTitle desc="Print this label onto the bag; scanning it lands on this page.">QR label</CardTitle>
+            <CardTitle desc="Print it for the bag or container. Scanning it opens this page.">QR label</CardTitle>
           </CardHead>
           <CardBody>
             <UnitQr unitId={unit.id} />
             <KeyValues
               items={[
-                { label: 'Kind', value: statusLabel(unit.kind) },
+                {
+                  label: 'Holds',
+                  value:
+                    unit.material === 'biochar' && !unit.coProduct ? (
+                      'Biochar'
+                    ) : (
+                      <span data-testid="unit-material">
+                        {statusLabel(unit.material)}
+                        {unit.coProduct ? `, grade ${unit.coProduct.grade}. ${unit.coProduct.fate}` : ''}
+                      </span>
+                    ),
+                },
+                { label: 'Kind', value: unit.kind === 'ibc' ? 'IBC tote' : statusLabel(unit.kind) },
                 { label: 'Mass', value: fmtKg(unit.massKg) },
                 {
                   label: 'Origin batch',

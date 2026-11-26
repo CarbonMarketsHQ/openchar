@@ -938,3 +938,27 @@ body {
   gap: var(--sp-3);
   align-items: baseline;
 }
+
+.co-row {
+  display: grid;
+  gap: 2px;
+  font-size: var(--t-ui-sm);
+  padding-bottom: var(--sp-3);
+  border-bottom: var(--border) solid var(--hairline);
+}
+.co-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.co-row-head {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.co-row-pack {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}

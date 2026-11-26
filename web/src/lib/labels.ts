@@ -12,6 +12,7 @@ const LABELS: Record<string, string> = {
   fail: 'Fail',
   mock: 'Mock',
   closed: 'Closed',
+  'bio-liquid': 'Bio-liquid',
 }
 
 export function statusLabel(value: string): string {
@@ -128,3 +129,11 @@ export const fuelUseLabel = (v: string) => FUEL_USES.find((f) => f.value === v)?
 export function fmtCo2e(t: number): string {
   return t < 1 ? `${Math.round(t * 1000).toLocaleString('en-GB')} kg CO2e` : `${t.toFixed(2)} t CO2e`
 }
+
+/** Containers for packaged co-products. */
+export const CONTAINERS: { value: string; label: string }[] = [
+  { value: 'drum', label: 'Drum' },
+  { value: 'ibc', label: 'IBC tote' },
+  { value: 'tank', label: 'Tank' },
+  { value: 'jerrycan', label: 'Jerrycan' },
+]

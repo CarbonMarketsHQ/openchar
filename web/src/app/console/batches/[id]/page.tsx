@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Badge, Card, CardBody, CardHead, CardTitle, KeyValues, LinkButton, Notice } from '@/design'
 import { api, type BatchDetail } from '@/lib/api'
 
-type UnitRow = { id: string; massKg: number; status: string }
+type UnitRow = { id: string; massKg: number; status: string; kind: string; material: string; coProduct: { id: string } | null }
 import { ApiDown, EmptyState, Stat, fmtDate, fmtKg } from '../../bits'
 import { statusLabel } from '@/lib/labels'
 import { CreateUnits } from './units-card'
@@ -23,6 +23,8 @@ import { Km } from '../../distance'
 import { ApplyDelivery, RecordConsignmentKm, SetDelivery } from './transport'
 import { ApplyToLedger, LogFuel } from '../../energy/forms'
 import { BalanceCard, type Balance } from './balance'
+import { PackageCoProduct } from './package-form'
+import { CONTAINERS } from '@/lib/labels'
 import { fmtCo2e, fuelUseLabel } from '@/lib/labels'
 import type { Distance } from '@/lib/api'
 
@@ -192,12 +194,32 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
                 None declared yet (R-3MBJ-0 wants every stream on record).
               </p>
             ) : (
-              <KeyValues
-                items={batch.coProducts.map((c) => ({
-                  label: `${statusLabel(c.kind)} ${c.grade}`,
-                  value: `${fmtKg(c.massKg)} · ${c.fate}`,
-                }))}
-              />
+              <div style={{ display: 'grid', gap: 'var(--sp-3)' }}>
+                {batch.coProducts.map((c) => {
+                  const packed = (units ?? []).filter((u) => u.coProduct?.id === c.id)
+                  const packedKg = packed.reduce((n, u) => n + u.massKg, 0)
+                  const left = c.massKg - packedKg
+                  return (
+                    <div key={c.id} className="co-row" data-testid="co-product-row">
+                      <div className="co-row-head">
+                        <b>
+                          {statusLabel(c.kind)} {c.grade}
+                        </b>
+                        <span className="num">{fmtKg(c.massKg)}</span>
+                      </div>
+                      <span className="muted">{c.fate}</span>
+                      <span className="co-row-pack">
+                        <span className="muted" data-testid="co-product-packed">
+                          {packed.length === 0
+                            ? 'Not in containers'
+                            : `${packed.length} ${packed.length === 1 ? 'container' : 'containers'}, ${fmtKg(packedKg)}`}
+                        </span>
+                        {left > 0.05 && <PackageCoProduct id={c.id} label={`${statusLabel(c.kind).toLowerCase()} ${c.grade}`} leftKg={left} />}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </CardBody>
         </Card>
@@ -218,6 +240,11 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
                       {u.id}
                     </Link>
                     <span className="num">{Math.round(u.massKg)} kg</span>
+                    {u.material !== 'biochar' && (
+                      <span>
+                        {statusLabel(u.material)} {CONTAINERS.find((k) => k.value === u.kind)?.label.toLowerCase() ?? u.kind}
+                      </span>
+                    )}
                     <span className="muted">{statusLabel(u.status)}</span>
                   </div>
                 ))}
