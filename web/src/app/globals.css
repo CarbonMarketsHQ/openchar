@@ -765,3 +765,45 @@ body {
   gap: var(--sp-2) var(--sp-3);
   margin-top: var(--sp-1);
 }
+
+/* ------------------------------------------------------------ transport */
+
+.km-est {
+  color: var(--ink-muted);
+  font-size: var(--t-caption);
+}
+.transport {
+  display: grid;
+  gap: var(--sp-6);
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+}
+.transport section {
+  display: grid;
+  gap: var(--sp-2);
+  align-content: start;
+}
+.transport-head {
+  margin: 0;
+  font-size: var(--t-ui);
+  font-weight: var(--w-medium);
+}
+.transport-sum {
+  margin: 0;
+  font-size: var(--t-ui-sm);
+}
+.transport-row {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) 5.5rem 6.5rem 4rem;
+  align-items: baseline;
+  font-size: var(--t-ui-sm);
+}
+.transport-row--delivery {
+  grid-template-columns: minmax(0, 1fr) 5.5rem 6.5rem 6rem;
+}
+.transport-row .num,
+.transport-row .km {
+  text-align: right;
+}
+.transport-row > :last-child {
+  justify-self: end;
+}

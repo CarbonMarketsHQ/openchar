@@ -19,16 +19,29 @@ import {
 import { TempChart } from './temp-chart'
 import { AddDocument } from '../../documents/add-document'
 import { DocumentList, type Doc } from '../../documents/document-list'
+import { Km } from '../../distance'
+import { ApplyDelivery, RecordConsignmentKm, SetDelivery } from './transport'
+import type { Distance } from '@/lib/api'
+
+type Leg = { id: string; massKg: number } & Distance
+type Transport = {
+  roadFactor: number
+  plantHasCoordinates: boolean
+  collection: { items: (Leg & { supplier: string })[]; meanKm: number | null; tonneKm: number; missing: string[] }
+  delivery: { items: (Leg & { toName: string })[]; meanKm: number | null; tonneKm: number; massT: number; missing: string[] }
+  ledger: { transportKm: number; transportMassT: number } | null
+}
 
 const STATUS_TONE = { open: 'info', sampled: 'positive', 'awaiting-lab': 'caution', closed: 'neutral' } as const
 
 export default async function BatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [batch, units, docs, shiftLog] = await Promise.all([
+  const [batch, units, docs, shiftLog, transport] = await Promise.all([
     api<BatchDetail>(`/batches/${encodeURIComponent(id)}`),
     api<UnitRow[]>(`/units?batch=${encodeURIComponent(id)}`),
     api<{ documents: Doc[] }>(`/documents?record=${encodeURIComponent(`batch:${id}`)}`),
     api<{ shifts: { operator: string; batches: string[] }[] }>('/shifts?limit=200'),
+    api<Transport>(`/batches/${encodeURIComponent(id)}/transport`),
   ])
   const operators = [
     ...new Set((shiftLog?.shifts ?? []).filter((s) => s.batches.includes(id)).map((s) => s.operator)),
@@ -263,6 +276,74 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
           </CardBody>
         </Card>
       </div>
+
+      {transport && (
+        <Card data-testid="batch-transport">
+          <CardHead>
+            <CardTitle
+              desc={`Collection and delivery kept apart. An estimate is the straight-line distance times ${transport.roadFactor} for roads, until a recorded distance replaces it.`}
+            >
+              Transport
+            </CardTitle>
+          </CardHead>
+          <CardBody>
+            <div className="transport">
+              <section>
+                <h3 className="transport-head">Feedstock collection</h3>
+                <p className="muted transport-sum" data-testid="collection-summary">
+                  {transport.collection.items.length === 0
+                    ? 'No consignments in this batch yet.'
+                    : `${transport.collection.items.length} ${transport.collection.items.length === 1 ? 'consignment' : 'consignments'}, mass-weighted ${transport.collection.meanKm ?? '–'} km, ${transport.collection.tonneKm} t·km`}
+                </p>
+                {transport.collection.items.map((c) => (
+                  <div key={c.id} className="dp-row transport-row" data-testid="collection-row">
+                    <span className="mono">{c.id}</span>
+                    <span>{c.supplier}</span>
+                    <span className="num">{fmtKg(c.massKg)}</span>
+                    <Km d={c} />
+                    <RecordConsignmentKm id={c.id} />
+                  </div>
+                ))}
+              </section>
+              <section>
+                <h3 className="transport-head">Biochar delivery</h3>
+                <p className="muted transport-sum" data-testid="delivery-summary">
+                  {transport.delivery.items.length === 0
+                    ? 'Nothing dispatched yet.'
+                    : transport.delivery.missing.length
+                      ? transport.delivery.missing.length === transport.delivery.items.length
+                        ? transport.delivery.items.length === 1
+                          ? 'This dispatch needs a distance or destination.'
+                          : 'These dispatches need a distance or destination.'
+                        : `${transport.delivery.missing.length} of ${transport.delivery.items.length} dispatches need a distance or destination.`
+                      : `${transport.delivery.massT} t, mass-weighted ${transport.delivery.meanKm} km, ${transport.delivery.tonneKm} t·km`}
+                </p>
+                {transport.delivery.items.map((d) => (
+                  <div key={d.id} className="dp-row transport-row transport-row--delivery" data-testid="delivery-row">
+                    <span>{d.toName}</span>
+                    <span className="num">{fmtKg(d.massKg)}</span>
+                    <Km d={d} />
+                    <SetDelivery id={d.id} toName={d.toName} />
+                  </div>
+                ))}
+                <p className="muted transport-sum" data-testid="ledger-transport">
+                  {transport.ledger
+                    ? `The ledger's transport line uses ${transport.ledger.transportKm} km for ${transport.ledger.transportMassT} t from the run inputs.`
+                    : 'No run inputs yet, so the ledger has no transport line.'}
+                </p>
+                {transport.ledger &&
+                  transport.delivery.items.length > 0 &&
+                  transport.delivery.missing.length === 0 &&
+                  transport.delivery.meanKm !== null &&
+                  (transport.delivery.meanKm !== transport.ledger.transportKm ||
+                    transport.delivery.massT !== transport.ledger.transportMassT) && (
+                    <ApplyDelivery code={batch.id} km={transport.delivery.meanKm} massT={transport.delivery.massT} />
+                  )}
+              </section>
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       <div style={{ display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap' }}>
         <LinkButton href={`/console/ledger/${batch.id}`} variant="solid">
