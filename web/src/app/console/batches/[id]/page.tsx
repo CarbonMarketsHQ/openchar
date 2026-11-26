@@ -21,6 +21,8 @@ import { AddDocument } from '../../documents/add-document'
 import { DocumentList, type Doc } from '../../documents/document-list'
 import { Km } from '../../distance'
 import { ApplyDelivery, RecordConsignmentKm, SetDelivery } from './transport'
+import { ApplyToLedger, LogFuel } from '../../energy/forms'
+import { fmtCo2e, fuelUseLabel } from '@/lib/labels'
 import type { Distance } from '@/lib/api'
 
 type Leg = { id: string; massKg: number } & Distance
@@ -29,19 +31,25 @@ type Transport = {
   plantHasCoordinates: boolean
   collection: { items: (Leg & { supplier: string })[]; meanKm: number | null; tonneKm: number; missing: string[] }
   delivery: { items: (Leg & { toName: string })[]; meanKm: number | null; tonneKm: number; massT: number; missing: string[] }
-  ledger: { transportKm: number; transportMassT: number } | null
+  ledger: { transportKm: number; transportMassT: number; collectionTkm: number | null } | null
+}
+type Energy = {
+  fuel: { entries: number; co2eT: number; byUse: { use: string; co2eT: number }[] }
+  electricity: { kwh: number | null; reason: string | null; meters: string[] }
+  ledger: { electricityKwh: number; fuelCo2eT: number | null } | null
 }
 
 const STATUS_TONE = { open: 'info', sampled: 'positive', 'awaiting-lab': 'caution', closed: 'neutral' } as const
 
 export default async function BatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const [batch, units, docs, shiftLog, transport] = await Promise.all([
+  const [batch, units, docs, shiftLog, transport, energy] = await Promise.all([
     api<BatchDetail>(`/batches/${encodeURIComponent(id)}`),
     api<UnitRow[]>(`/units?batch=${encodeURIComponent(id)}`),
     api<{ documents: Doc[] }>(`/documents?record=${encodeURIComponent(`batch:${id}`)}`),
     api<{ shifts: { operator: string; batches: string[] }[] }>('/shifts?limit=200'),
     api<Transport>(`/batches/${encodeURIComponent(id)}/transport`),
+    api<Energy>(`/batches/${encodeURIComponent(id)}/energy`),
   ])
   const operators = [
     ...new Set((shiftLog?.shifts ?? []).filter((s) => s.batches.includes(id)).map((s) => s.operator)),
@@ -295,6 +303,16 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
                     ? 'No consignments in this batch yet.'
                     : `${transport.collection.items.length} ${transport.collection.items.length === 1 ? 'consignment' : 'consignments'}, mass-weighted ${transport.collection.meanKm ?? '–'} km, ${transport.collection.tonneKm} t·km`}
                 </p>
+                {transport.ledger &&
+                  transport.collection.items.length > 0 &&
+                  transport.collection.missing.length === 0 &&
+                  transport.collection.tonneKm !== transport.ledger.collectionTkm && (
+                    <ApplyToLedger
+                      path={`/batches/${batch.id}/transport/apply-collection`}
+                      label={`Use ${transport.collection.tonneKm} t·km collection in the ledger`}
+                      testId="apply-collection"
+                    />
+                  )}
                 {transport.collection.items.map((c) => (
                   <div key={c.id} className="dp-row transport-row" data-testid="collection-row">
                     <span className="mono">{c.id}</span>
@@ -328,7 +346,11 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
                 ))}
                 <p className="muted transport-sum" data-testid="ledger-transport">
                   {transport.ledger
-                    ? `The ledger's transport line uses ${transport.ledger.transportKm} km for ${transport.ledger.transportMassT} t from the run inputs.`
+                    ? `The ledger's transport line uses ${transport.ledger.transportKm} km for ${transport.ledger.transportMassT} t from the run inputs${
+                        transport.ledger.collectionTkm !== null
+                          ? `, and its collection line ${transport.ledger.collectionTkm} t·km.`
+                          : '. Collection is not in the ledger yet.'
+                      }`
                     : 'No run inputs yet, so the ledger has no transport line.'}
                 </p>
                 {transport.ledger &&
@@ -339,6 +361,71 @@ export default async function BatchPage({ params }: { params: Promise<{ id: stri
                     transport.delivery.massT !== transport.ledger.transportMassT) && (
                     <ApplyDelivery code={batch.id} km={transport.delivery.meanKm} massT={transport.delivery.massT} />
                   )}
+              </section>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {energy && (
+        <Card data-testid="batch-energy">
+          <CardHead>
+            <CardTitle desc="Fuel logged against this batch and the electricity its meters recorded. The ledger takes them when you apply them.">
+              Fuel and electricity
+            </CardTitle>
+          </CardHead>
+          <CardBody>
+            <div className="transport">
+              <section>
+                <h3 className="transport-head">Fuel</h3>
+                <p className="muted transport-sum" data-testid="fuel-summary">
+                  {energy.fuel.entries === 0
+                    ? 'No fuel logged against this batch.'
+                    : `${energy.fuel.entries} ${energy.fuel.entries === 1 ? 'entry' : 'entries'}, ${fmtCo2e(energy.fuel.co2eT)} fossil`}
+                </p>
+                {energy.fuel.byUse.map((u) => (
+                  <div key={u.use} className="dp-row transport-row transport-row--pair" data-testid="fuel-use-row">
+                    <span>{fuelUseLabel(u.use)}</span>
+                    <span className="num">{u.co2eT === 0 ? 'Biogenic' : fmtCo2e(u.co2eT)}</span>
+                  </div>
+                ))}
+                <p className="muted transport-sum" data-testid="ledger-fuel">
+                  {energy.ledger
+                    ? energy.ledger.fuelCo2eT === null
+                      ? 'Fuel is not in the ledger yet.'
+                      : `The ledger's fuel line uses ${fmtCo2e(energy.ledger.fuelCo2eT)}.`
+                    : 'No run inputs yet.'}
+                </p>
+                <div style={{ display: 'flex', gap: 'var(--sp-3)', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <LogFuel batchCode={batch.id} variant="outline" />
+                  {energy.ledger && energy.fuel.entries > 0 && energy.fuel.co2eT !== energy.ledger.fuelCo2eT && (
+                    <ApplyToLedger
+                      path={`/batches/${batch.id}/energy/apply`}
+                      body={{ what: 'fuel' }}
+                      label={`Use ${fmtCo2e(energy.fuel.co2eT)} in the ledger`}
+                      testId="apply-fuel"
+                    />
+                  )}
+                </div>
+              </section>
+              <section>
+                <h3 className="transport-head">Electricity</h3>
+                <p className="muted transport-sum" data-testid="meter-summary">
+                  {energy.electricity.kwh !== null
+                    ? `${energy.electricity.kwh.toLocaleString('en-GB')} kWh on ${energy.electricity.meters.join(', ')} across the batch window`
+                    : energy.electricity.reason}
+                </p>
+                <p className="muted transport-sum" data-testid="ledger-electricity">
+                  {energy.ledger ? `The ledger's electricity line uses ${energy.ledger.electricityKwh.toLocaleString('en-GB')} kWh.` : 'No run inputs yet.'}
+                </p>
+                {energy.ledger && energy.electricity.kwh !== null && energy.electricity.kwh !== energy.ledger.electricityKwh && (
+                  <ApplyToLedger
+                    path={`/batches/${batch.id}/energy/apply`}
+                    body={{ what: 'electricity' }}
+                    label={`Use ${energy.electricity.kwh.toLocaleString('en-GB')} kWh in the ledger`}
+                    testId="apply-electricity"
+                  />
+                )}
               </section>
             </div>
           </CardBody>

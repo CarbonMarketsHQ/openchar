@@ -807,3 +807,6 @@ body {
 .transport-row > :last-child {
   justify-self: end;
 }
+.transport-row--pair {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
