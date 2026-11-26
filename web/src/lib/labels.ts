@@ -107,3 +107,24 @@ export function relativeDays(days: number): string {
   if (days === -1) return 'yesterday'
   return days > 0 ? `in ${days} days` : `${-days} days ago`
 }
+
+export const FUELS: { value: string; label: string; unit: string }[] = [
+  { value: 'diesel', label: 'Diesel', unit: 'l' },
+  { value: 'petrol', label: 'Petrol', unit: 'l' },
+  { value: 'lpg', label: 'LPG', unit: 'kg' },
+  { value: 'biomass', label: 'Biomass (start-up wood or residue)', unit: 'kg' },
+]
+export const FUEL_USES: { value: string; label: string }[] = [
+  { value: 'reactor-startup', label: 'Reactor start-up' },
+  { value: 'generator', label: 'Generator' },
+  { value: 'loader', label: 'Loader or forklift' },
+  { value: 'vehicle-trip', label: 'Vehicle trip' },
+  { value: 'other', label: 'Other' },
+]
+export const fuelLabel = (v: string) => FUELS.find((f) => f.value === v)?.label.split(' (')[0] ?? statusLabel(v)
+export const fuelUseLabel = (v: string) => FUEL_USES.find((f) => f.value === v)?.label ?? statusLabel(v)
+
+/** 0.1152 → "115 kg CO2e", 2.4 → "2.40 t CO2e". */
+export function fmtCo2e(t: number): string {
+  return t < 1 ? `${Math.round(t * 1000).toLocaleString('en-GB')} kg CO2e` : `${t.toFixed(2)} t CO2e`
+}
