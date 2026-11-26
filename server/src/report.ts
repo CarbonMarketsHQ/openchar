@@ -3,6 +3,7 @@
  * snapshots and Certify-shaped payloads. Everything is project-scoped and
  * data-driven: no client-specific text lives in code.
  */
+import { instrumentsFor } from './calibration.js'
 import { pool, verifyChain } from './db.js'
 import {
   batchLedger,
@@ -239,14 +240,36 @@ export async function buildCompliance(projectId: string): Promise<{
   // Site readiness, computed from onboarding data rather than hardcoded.
   const site: { id: string; title: string; state: 'pass' | 'warn' | 'fail'; detail: string }[] = []
   const calibration = await projectSource(projectId, 'calibration')
+  const instruments = await instrumentsFor(projectId)
+  const scales = instruments.filter((i) => i.kind === 'scale')
+  const lapsed = (list: typeof instruments) => list.filter((i) => i.state === 'overdue' || i.state === 'failed' || i.state === 'never')
+  // With scales in the register, their calibration status decides. Without, a filed certificate does.
+  const scalesOk = scales.length ? lapsed(scales).length === 0 : Boolean(calibration)
+  const scaleNote = scales.length
+    ? lapsed(scales).length
+      ? ` Not calibrated: ${lapsed(scales).map((i) => i.name).join(', ')}.`
+      : ` ${scales.length} ${scales.length === 1 ? 'scale is' : 'scales are'} in the calibration register, ${scales.length === 1 ? 'in calibration' : 'all in calibration'}.`
+    : calibration
+      ? ''
+      : ' File the scale calibration certificates: the protocol wants calibrated scales for every batch.'
   site.push({
     id: 'SITE-SCALES',
     title: 'Calibrated weighing at plant gate',
-    state: calibration ? 'pass' : 'warn',
-    detail: facility?.scales_note
-      ? `${facility.scales_note}${calibration ? '' : ' File the scale calibration certificates: the protocol wants calibrated scales for every batch.'}`
-      : 'No weighing arrangement recorded for the facility yet.',
+    state: scalesOk ? 'pass' : 'warn',
+    detail: facility?.scales_note ? `${facility.scales_note}${scaleNote}` : 'No weighing arrangement recorded for the facility yet.',
   })
+  if (instruments.length) {
+    const bad = lapsed(instruments)
+    const soon = instruments.filter((i) => i.state === 'due-soon')
+    site.push({
+      id: 'SITE-CALIBRATION',
+      title: 'Instruments in calibration',
+      state: bad.length ? 'warn' : 'pass',
+      detail: bad.length
+        ? `${bad.length} of ${instruments.length} ${instruments.length === 1 ? 'instrument' : 'instruments'} out of calibration: ${bad.map((i) => i.name).join(', ')}.`
+        : `All ${instruments.length} ${instruments.length === 1 ? 'instrument is' : 'instruments are'} in calibration.${soon.length ? ` Due within 30 days: ${soon.map((i) => i.name).join(', ')}.` : ''}`,
+    })
+  }
   const certCount = (
     await pool.query(
       `SELECT count(*)::int AS n FROM certificates c JOIN batches b ON b.id = c.batch_id WHERE b.project_id = $1`,
