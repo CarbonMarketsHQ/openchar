@@ -414,7 +414,7 @@ export default function ApplyApp() {
               <IconPin size={16} /> {gps ? 'GPS fixed' : 'Pin GPS'}
             </Button>
             <Button type="button" variant="outline" onClick={() => photoInput.current?.click()} data-testid="apply-photo">
-              <IconCamera size={16} /> {photos.length ? `${photos.length} photos` : 'Take photos'}
+              <IconCamera size={16} /> {photos.length ? `${photos.length} ${photos.length === 1 ? 'photo' : 'photos'}` : 'Take photos'}
             </Button>
           </div>
           <input
